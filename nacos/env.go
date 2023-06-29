@@ -66,11 +66,11 @@ func render(name, format string, cpc *ConfigParamConfig) string {
 	return tpl.String()
 }
 
-// NaocsConfigParam Get nacos config group from environment variables
+// NaocsConfigParam Get nacos config from environment variables. All the parameters can be customised with CustomFunction.
 // ConfigParam explain:
-//  1. Type: data format, only support json and yaml, JSON by default. customize it use CustomFunction.
-//  2. Context: empty by default, customize it use CustomFunction.
-//  3. Group: DEFAULT_GROUP by default. Customize it by CustomFunction or use specified format. ref: nacos/env.go:46
+//  1. Type: data format, support JSON YMAL, JSON by default. Could extend it by implementing the ConfigParser interface.
+//  2. Context: empty by default it use CustomFunction.
+//  3. Group: DEFAULT_GROUP by default.
 //  4. DataId: {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}} by default. Customize it by CustomFunction or
 //     use specified format. ref: nacos/env.go:46
 func NaocsConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) vo.ConfigParam {

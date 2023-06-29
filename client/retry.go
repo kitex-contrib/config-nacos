@@ -16,7 +16,6 @@ package client
 
 import (
 	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/nacos-group/nacos-sdk-go/clients/config_client"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/cloudwego/kitex/client"
@@ -29,7 +28,9 @@ const (
 )
 
 // WithRetryPolicy sets the retry policy from nacos config center.
-func WithRetryPolicy(dest string, nacosClient config_client.IConfigClient, cfs ...nacos.CustomFunction) []client.Option {
+func WithRetryPolicy(dest string, nacosClient nacos.Client,
+	cfs ...nacos.CustomFunction,
+) []client.Option {
 	param := nacos.NaocsConfigParam(&nacos.ConfigParamConfig{
 		Category:          retryConfigName,
 		ClientServiceName: dest,
@@ -39,41 +40,43 @@ func WithRetryPolicy(dest string, nacosClient config_client.IConfigClient, cfs .
 		client.WithRetryContainer(initRetryContainer(param, dest, nacosClient)),
 		client.WithCloseCallbacks(func() error {
 			// cancel the config listener when client is closed.
-			return nacosClient.CancelListenConfig(param)
+			return nacosClient.DeregisterConfig(param)
 		}),
 	}
 }
 
 type retryConfigs map[string]*retry.Policy
 
-func initRetryContainer(param vo.ConfigParam, dest string, nacosClient config_client.IConfigClient) *retry.Container {
+func initRetryContainer(param vo.ConfigParam, dest string,
+	nacosClient nacos.Client,
+) *retry.Container {
 	retryContainer := retry.NewRetryContainer()
 
-	onChangeCallback := func(data string) {
+	onChangeCallback := func(data string, parser nacos.ConfigParser) {
 		rcs := retryConfigs{}
-		err := nacos.Unmarshal(param.Type, data, rcs)
+		err := parser.Decode(param.Type, data, rcs)
 		if err != nil {
 			klog.Warnf("[nacos] %s client nacos retry: unmarshal data %s failed: %s, skip...", dest, data, err)
 			return
 		}
-		for method, pilocy := range rcs {
-			if pilocy.BackupPolicy != nil && pilocy.FailurePolicy != nil {
+
+		for method, policy := range rcs {
+			if policy.BackupPolicy != nil && policy.FailurePolicy != nil {
 				klog.Warnf("[nacos] %s client policy for method %s BackupPolicy and FailurePolicy must not be set at same time",
 					dest, method)
 				continue
 			}
-			if pilocy.BackupPolicy == nil && pilocy.FailurePolicy == nil {
+			if policy.BackupPolicy == nil && policy.FailurePolicy == nil {
 				klog.Warnf("[nacos] %s client policy for method %s BackupPolicy and FailurePolicy must not be empty at same time",
 					dest, method)
 				continue
 			}
-			retryContainer.NotifyPolicyChange(method, *pilocy)
+			retryContainer.NotifyPolicyChange(method, *policy)
 		}
 	}
 
-	nacos.RegistryConfigUpdateCallback(dest,
+	nacosClient.RegisterConfigCallback(dest,
 		retryConfigName,
-		nacosClient,
 		param,
 		onChangeCallback,
 	)

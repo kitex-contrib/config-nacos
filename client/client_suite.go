@@ -16,20 +16,21 @@ package client
 
 import (
 	"github.com/cloudwego/kitex/client"
-	"github.com/nacos-group/nacos-sdk-go/clients/config_client"
 
 	"github.com/kitex-contrib/config-nacos/nacos"
 )
 
 // NacosClientSuite nacos client config suite, configure retry timeout limit and circuitbreak dynamically from nacos.
 type NacosClientSuite struct {
-	nacosClient config_client.IConfigClient
+	nacosClient nacos.Client
 	service     string
 	fns         []nacos.CustomFunction
 }
 
 // NewSuite ...
-func NewSuite(service string, cli config_client.IConfigClient, cfs ...nacos.CustomFunction) *NacosClientSuite {
+func NewSuite(service string, cli nacos.Client,
+	cfs ...nacos.CustomFunction,
+) *NacosClientSuite {
 	return &NacosClientSuite{
 		service:     service,
 		nacosClient: cli,
@@ -39,7 +40,7 @@ func NewSuite(service string, cli config_client.IConfigClient, cfs ...nacos.Cust
 
 // Options return a list client.Option
 func (s *NacosClientSuite) Options() []client.Option {
-	opts := make([]client.Option, 0, 5)
-	opts = append(opts, WithRetryPolicy(s.service, s.nacosClient)...)
+	opts := make([]client.Option, 0, 8)
+	opts = append(opts, WithRetryPolicy(s.service, s.nacosClient, s.fns...)...)
 	return opts
 }

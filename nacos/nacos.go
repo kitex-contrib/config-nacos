@@ -15,20 +15,30 @@
 package nacos
 
 import (
-	"fmt"
-
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/nacos-group/nacos-sdk-go/clients"
 	"github.com/nacos-group/nacos-sdk-go/clients/config_client"
 	"github.com/nacos-group/nacos-sdk-go/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/vo"
-	"sigs.k8s.io/yaml"
 )
 
-// NewDefaultNacosClient Create a default Nacos client
+// Client the wrapper of nacos client.
+type Client interface {
+	SetParser(ConfigParser)
+	RegisterConfigCallback(string, string, vo.ConfigParam, func(string, ConfigParser))
+	DeregisterConfig(vo.ConfigParam) error
+}
+
+type client struct {
+	ncli config_client.IConfigClient
+	// support customise parser
+	parser ConfigParser
+}
+
+// DefaultClient Create a default Nacos client
 // It can create a client with default config by env variable.
 // See: env.go
-func NewDefaultNacosClient() (config_client.IConfigClient, error) {
+func DefaultClient() (Client, error) {
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig(NacosAddr(), uint64(NacosPort())),
 	}
@@ -38,45 +48,51 @@ func NewDefaultNacosClient() (config_client.IConfigClient, error) {
 		NotLoadCacheAtStart: true,
 		CustomLogger:        NewCustomNacosLogger(),
 	}
-	return clients.NewConfigClient(
+	nacosClient, err := clients.NewConfigClient(
 		vo.NacosClientParam{
 			ClientConfig:  &cc,
 			ServerConfigs: sc,
 		},
 	)
+	if err != nil {
+		return nil, err
+	}
+	c := &client{
+		ncli:   nacosClient,
+		parser: defaultConfigParse(),
+	}
+	return c, nil
 }
 
-// RegistryConfigUpdateCallback registry the callback function to nacos client.
-func RegistryConfigUpdateCallback(dest, category string,
-	nacosClient config_client.IConfigClient,
+// SetParser support customise parser
+func (c *client) SetParser(parser ConfigParser) {
+	c.parser = parser
+}
+
+// DeregisterConfig deregister the config.
+func (c *client) DeregisterConfig(cfg vo.ConfigParam) error {
+	return c.ncli.CancelListenConfig(cfg)
+}
+
+// RegisterConfigCallback register the callback function to nacos client.
+func (c *client) RegisterConfigCallback(dest, category string,
 	param vo.ConfigParam,
-	callback func(string),
+	callback func(string, ConfigParser),
 ) {
 	param.OnChange = func(namespace, group, dataId, data string) {
 		klog.Debugf("[nacos] %s client %s config updated, namespace %s group %s dataId %s data %s",
 			dest, category, namespace, group, dataId, data)
-		callback(data)
+		callback(data, c.parser)
 	}
-	data, err := nacosClient.GetConfig(param)
+	data, err := c.ncli.GetConfig(param)
 	if err != nil && !IsNotExistError(err) {
 		panic(err)
 	}
 
-	callback(data)
+	callback(data, c.parser)
 
-	err = nacosClient.ListenConfig(param)
+	err = c.ncli.ListenConfig(param)
 	if err != nil {
 		panic(err)
-	}
-}
-
-// Unmarshal unmarshals the data to struct in specified format.
-func Unmarshal(kind vo.ConfigType, data string, config interface{}) error {
-	switch kind {
-	case vo.YAML, vo.JSON:
-		// support json and yaml since YAML is a superset of JSON, it can parse JSON using a YAML parser
-		return yaml.Unmarshal([]byte(data), config)
-	default:
-		return fmt.Errorf("unsupport config data type %s", kind)
 	}
 }
