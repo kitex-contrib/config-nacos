@@ -45,6 +45,7 @@ func WithRetryPolicy(dest string, nacosClient nacos.Client,
 	}
 }
 
+// the key is method name, wildcard "*" can match anything.
 type retryConfigs map[string]*retry.Policy
 
 func initRetryContainer(param vo.ConfigParam, dest string,

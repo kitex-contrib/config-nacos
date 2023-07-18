@@ -1,18 +1,14 @@
-# config-nacos (*This is a community driven project*)
+# config-nacos 
 
-[中文](https://github.com/kitex-contrib/config-nacos/blob/main/README_CN.md)
+[English](https://github.com/kitex-contrib/config-nacos/blob/main/README.md)
 
-Nacos as config centre.
+使用 **nacos** 作为 **Kitex** 的配置中心
 
-## How to use?
+##  这个项目应当如何使用?
 
-### Basic
+### 基本使用
 
-#### Server
-
-TODO
-
-#### Client
+#### 客户端
 
 ```go
 import (
@@ -50,22 +46,19 @@ func main() {
 }
 ```
 
-### Environment Variable
+### 环境变量
 
-| Environment Variable Name | Environment Variable Default Value | Environment Variable Introduction |
+| 变量名 | 变量默认值 | 作用 |
 | ------------------------- | ---------------------------------- | --------------------------------- |
-| serverAddr                | 127.0.0.1                          | nacos server address              |
-| serverPort                | 8848                               | nacos server port                 |
-| namespace                 |                                    | the namespaceId of nacos          |
+| serverAddr               | 127.0.0.1                          | nacos 服务器地址 |
+| serverPort               | 8848                               | nacos 服务器端口            |
+| namespace                 |                                    | nacos 中的 namespace Id |
 | configDataId              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | the  format of config data id          |
 | configGroup               | DEFAULT_GROUP                      | the group of config data          |
 
-### More Info
+### 更多信息
 
-Refer to [example](example) for more usage.
+更多示例请参考 [example](example)
 
-## Compatibility
-This Package use Nacos1.x client. The Nacos2.0 and Nacos1.0 Server are fully compatible with it. [see](https://nacos.io/en-us/docs/v2/upgrading/2.0.0-compatibility.html)
-
-maintained by: [whalecold](https://github.com/whalecold)
-
+## 兼容性
+该包使用 Nacos1.x 客户端，Nacos2.0 和 Nacos1.0 服务端完全兼容该版本. [详情](https://nacos.io/zh-cn/docs/v2/upgrading/2.0.0-compatibility.html)
