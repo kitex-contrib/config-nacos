@@ -85,7 +85,8 @@ func (c *client) RegisterConfigCallback(dest, category string,
 		callback(data, c.parser)
 	}
 	data, err := c.ncli.GetConfig(param)
-	if err != nil && !IsNotExistError(err) {
+	// the nacos client has handled the not exist error.
+	if err != nil {
 		panic(err)
 	}
 
