@@ -35,7 +35,7 @@ func TestEnvFunc(t *testing.T) {
 	assert.Equal(t, vo.ConfigParam{
 		Type:    vo.JSON,
 		Group:   NACOS_DEFAULT_CONFIG_GROUP,
-		Content: defaultContext,
+		Content: defaultContent,
 		DataId:  "cli.svc.retry",
 	}, NaocsConfigParam(cpc))
 
@@ -51,7 +51,7 @@ func TestEnvFunc(t *testing.T) {
 	assert.Equal(t, vo.ConfigParam{
 		Type:    vo.JSON,
 		Group:   "retry",
-		Content: defaultContext,
+		Content: defaultContent,
 		DataId:  "cli",
 	}, NaocsConfigParam(cpc))
 }

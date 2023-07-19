@@ -39,7 +39,7 @@ const (
 )
 
 const (
-	defaultContext = ""
+	defaultContent = ""
 )
 
 // CustomFunction use for customize the config parameters.
@@ -69,7 +69,7 @@ func render(name, format string, cpc *ConfigParamConfig) string {
 // NaocsConfigParam Get nacos config from environment variables. All the parameters can be customized with CustomFunction.
 // ConfigParam explain:
 //  1. Type: data format, support JSON and YAML, JSON by default. Could extend it by implementing the ConfigParser interface.
-//  2. Context: empty by default. Customize with CustomFunction.
+//  2. Content: empty by default. Customize with CustomFunction.
 //  3. Group: DEFAULT_GROUP by default.
 //  4. DataId: {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}} by default. Customize it by CustomFunction or
 //     use specified format. ref: nacos/env.go:46
@@ -78,7 +78,7 @@ func NaocsConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) vo.ConfigPa
 		DataId:  render("dataId", NacosConfigDataId(), cpc),
 		Group:   render("group", NacosConfigGroup(), cpc),
 		Type:    vo.JSON,
-		Content: defaultContext,
+		Content: defaultContent,
 	}
 	for _, cf := range cfs {
 		cf(&param)
