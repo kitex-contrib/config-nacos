@@ -24,15 +24,17 @@ import (
 type NacosClientSuite struct {
 	nacosClient nacos.Client
 	service     string
+	client      string
 	fns         []nacos.CustomFunction
 }
 
-// NewSuite ...
-func NewSuite(service string, cli nacos.Client,
+// NewSuite service is the destination service name and client is the local identity.
+func NewSuite(service, client string, cli nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) *NacosClientSuite {
 	return &NacosClientSuite{
 		service:     service,
+		client:      client,
 		nacosClient: cli,
 		fns:         cfs,
 	}
@@ -41,6 +43,6 @@ func NewSuite(service string, cli nacos.Client,
 // Options return a list client.Option
 func (s *NacosClientSuite) Options() []client.Option {
 	opts := make([]client.Option, 0, 8)
-	opts = append(opts, WithRetryPolicy(s.service, s.nacosClient, s.fns...)...)
+	opts = append(opts, WithRetryPolicy(s.service, s.client, s.nacosClient, s.fns...)...)
 	return opts
 }

@@ -27,19 +27,20 @@ const (
 	retryConfigName = "retry_config"
 )
 
-// WithRetryPolicy sets the retry policy from nacos config center.
-func WithRetryPolicy(dest string, nacosClient nacos.Client,
+// WithRetryPolicy sets the retry policy from nacos configuration center.
+func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) []client.Option {
 	param := nacos.NaocsConfigParam(&nacos.ConfigParamConfig{
 		Category:          retryConfigName,
-		ClientServiceName: dest,
+		ServerServiceName: dest,
+		ClientServiceName: src,
 	}, cfs...)
 
 	return []client.Option{
 		client.WithRetryContainer(initRetryContainer(param, dest, nacosClient)),
 		client.WithCloseCallbacks(func() error {
-			// cancel the config listener when client is closed.
+			// cancel the configuration listener when client is closed.
 			return nacosClient.DeregisterConfig(param)
 		}),
 	}

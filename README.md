@@ -40,7 +40,7 @@ func main() {
 		//client.WithResolver(r),
 	}
 
-	opts = append(opts, retry.NewSuite("echo", nacosClient, fn).Options()...)
+	opts = append(opts, retry.NewSuite("echo", "test", nacosClient, fn).Options()...)
 
 	client, err := echo.NewClient(
 		"echo",
