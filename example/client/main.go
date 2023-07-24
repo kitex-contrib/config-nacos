@@ -32,9 +32,7 @@ import (
 )
 
 func main() {
-
 	klog.SetLevel(klog.LevelDebug)
-
 	r, err := resolver.NewDefaultNacosResolver()
 	if err != nil {
 		panic(err)

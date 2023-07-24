@@ -44,6 +44,7 @@ func WithRPCTimeout(dest, src string, nacosClient nacos.Client,
 	}
 }
 
+// rpcTimeoutContainer the implementation of timeout provider.
 type rpcTimeoutContainer struct {
 	// the key is method name, wildcard "*" can match anything.
 	configs map[string]*rpctimeout.RPCTimeout
@@ -56,12 +57,13 @@ func newRPCTimeoutContainer() *rpcTimeoutContainer {
 	}
 }
 
-func (rtc *rpcTimeoutContainer) NotifyPolicyChange(configs map[string]*rpctimeout.RPCTimeout) {
+func (rtc *rpcTimeoutContainer) notifyPolicyChange(configs map[string]*rpctimeout.RPCTimeout) {
 	rtc.Lock()
 	defer rtc.Unlock()
 	rtc.configs = configs
 }
 
+// Timeouts return the rpc timeout config by the method name of rpc info.
 func (rtc *rpcTimeoutContainer) Timeouts(ri rpcinfo.RPCInfo) rpcinfo.Timeouts {
 	rtc.RLock()
 	defer rtc.RUnlock()
@@ -89,7 +91,7 @@ func initRPCTimeoutContainer(param vo.ConfigParam, dest string,
 			klog.Warnf("[nacos] %s client nacos rpc timeout: unmarshal data %s failed: %s, skip...", dest, data, err)
 			return
 		}
-		rpcTimeoutContainer.NotifyPolicyChange(configs)
+		rpcTimeoutContainer.notifyPolicyChange(configs)
 	}
 
 	nacosClient.RegisterConfigCallback(dest,
