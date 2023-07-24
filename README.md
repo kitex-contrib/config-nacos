@@ -19,7 +19,7 @@ import (
     // ...
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
 	"github.com/cloudwego/kitex/client"
-	retry "github.com/kitex-contrib/config-nacos/client"
+	nacosclient "github.com/kitex-contrib/config-nacos/client"
 	"github.com/kitex-contrib/config-nacos/nacos"
     // ...
 )
@@ -40,7 +40,7 @@ func main() {
 		//client.WithResolver(r),
 	}
 
-	opts = append(opts, retry.NewSuite("echo", "test", nacosClient, fn).Options()...)
+	opts = append(opts, nacosclient.NewSuite("echo", "test", nacosClient, fn).Options()...)
 
 	client, err := echo.NewClient(
 		"echo",
@@ -62,7 +62,8 @@ func main() {
 
 ### More Info
 
-Refer to [example](example) for more usage.
+Refer to [example](https://github.com/kitex-contrib/config-nacos/tree/main/example) for more usage.
+
 
 ## Compatibility
 This Package use Nacos1.x client. The Nacos2.0 and Nacos1.0 Server are fully compatible with it. [see](https://nacos.io/en-us/docs/v2/upgrading/2.0.0-compatibility.html)
