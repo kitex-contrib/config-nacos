@@ -20,6 +20,13 @@ import (
 	"github.com/kitex-contrib/config-nacos/nacos"
 )
 
+const (
+	retryConfigName      = "retry_config"
+	rpcTimeoutConfigName = "rpc_timeout"
+
+	wildcardMethod = "*"
+)
+
 // NacosClientSuite nacos client config suite, configure retry timeout limit and circuitbreak dynamically from nacos.
 type NacosClientSuite struct {
 	nacosClient nacos.Client
@@ -44,5 +51,6 @@ func NewSuite(service, client string, cli nacos.Client,
 func (s *NacosClientSuite) Options() []client.Option {
 	opts := make([]client.Option, 0, 8)
 	opts = append(opts, WithRetryPolicy(s.service, s.client, s.nacosClient, s.fns...)...)
+	opts = append(opts, WithRPCTimeout(s.service, s.client, s.nacosClient, s.fns...)...)
 	return opts
 }
