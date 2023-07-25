@@ -23,8 +23,6 @@ import (
 const (
 	retryConfigName      = "retry_config"
 	rpcTimeoutConfigName = "rpc_timeout"
-
-	wildcardMethod = "*"
 )
 
 // NacosClientSuite nacos client config suite, configure retry timeout limit and circuitbreak dynamically from nacos.
