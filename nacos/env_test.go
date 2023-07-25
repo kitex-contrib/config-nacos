@@ -37,7 +37,7 @@ func TestEnvFunc(t *testing.T) {
 		Group:   NACOS_DEFAULT_CONFIG_GROUP,
 		Content: defaultContent,
 		DataId:  "cli.svc.retry",
-	}, NaocsConfigParam(cpc))
+	}, NacosConfigParam(cpc))
 
 	t.Setenv(NACOS_ENV_NAMESPACE_ID, "ns")
 	t.Setenv(NACOS_ENV_SERVER_ADDR, "1.1.1.1")
@@ -53,5 +53,5 @@ func TestEnvFunc(t *testing.T) {
 		Group:   "retry",
 		Content: defaultContent,
 		DataId:  "cli",
-	}, NaocsConfigParam(cpc))
+	}, NacosConfigParam(cpc))
 }

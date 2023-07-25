@@ -15,7 +15,7 @@ import (
     // ...
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
 	"github.com/cloudwego/kitex/client"
-	retry "github.com/kitex-contrib/config-nacos/client"
+	nacosclient "github.com/kitex-contrib/config-nacos/client"
 	"github.com/kitex-contrib/config-nacos/nacos"
     // ...
 )
@@ -36,7 +36,7 @@ func main() {
 		//client.WithResolver(r),
 	}
 
-	opts = append(opts, retry.NewSuite("echo", "test", nacosClient, fn).Options()...)
+	opts = append(opts, nacosclient.NewSuite("echo", "test", nacosClient, fn).Options()...)
 
 	client, err := echo.NewClient(
 		"echo",
@@ -58,7 +58,9 @@ func main() {
 
 ### 更多信息
 
-更多示例请参考 [example](example)
+更多示例请参考 [example](https://github.com/kitex-contrib/config-nacos/tree/main/example)
 
 ## 兼容性
 该包使用 Nacos1.x 客户端，Nacos2.0 和 Nacos1.0 服务端完全兼容该版本. [详情](https://nacos.io/zh-cn/docs/v2/upgrading/2.0.0-compatibility.html)
+
+主要贡献者： [whalecold](https://github.com/whalecold)

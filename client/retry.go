@@ -23,15 +23,11 @@ import (
 	"github.com/cloudwego/kitex/pkg/retry"
 )
 
-const (
-	retryConfigName = "retry_config"
-)
-
 // WithRetryPolicy sets the retry policy from nacos configuration center.
 func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) []client.Option {
-	param := nacos.NaocsConfigParam(&nacos.ConfigParamConfig{
+	param := nacos.NacosConfigParam(&nacos.ConfigParamConfig{
 		Category:          retryConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,
