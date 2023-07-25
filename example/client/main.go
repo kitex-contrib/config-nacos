@@ -18,11 +18,9 @@ package main
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
-	"github.com/cloudwego/kitex-examples/middleware/mymiddleware"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
 	nacosclient "github.com/kitex-contrib/config-nacos/client"
@@ -49,8 +47,6 @@ func main() {
 
 	opts := []client.Option{
 		client.WithHostPorts("0.0.0.0:8888"),
-		client.WithMiddleware(mymiddleware.CommonMiddleware),
-		client.WithMiddleware(mymiddleware.ClientMiddleware),
 		client.WithResolver(r),
 	}
 
@@ -71,6 +67,5 @@ func main() {
 		} else {
 			klog.Infof("receive response %v", resp)
 		}
-		time.Sleep(time.Second)
 	}
 }
