@@ -21,8 +21,9 @@ import (
 )
 
 const (
-	retryConfigName      = "retry_config"
-	rpcTimeoutConfigName = "rpc_timeout"
+	retryConfigName          = "retry_config"
+	rpcTimeoutConfigName     = "rpc_timeout"
+	circuitBreakerConfigName = "cb_config"
 )
 
 // NacosClientSuite nacos client config suite, configure retry timeout limit and circuitbreak dynamically from nacos.
@@ -47,8 +48,9 @@ func NewSuite(service, client string, cli nacos.Client,
 
 // Options return a list client.Option
 func (s *NacosClientSuite) Options() []client.Option {
-	opts := make([]client.Option, 0, 8)
+	opts := make([]client.Option, 0, 7)
 	opts = append(opts, WithRetryPolicy(s.service, s.client, s.nacosClient, s.fns...)...)
 	opts = append(opts, WithRPCTimeout(s.service, s.client, s.nacosClient, s.fns...)...)
+	opts = append(opts, WithCircuitBreaker(s.service, s.client, s.nacosClient, s.fns...)...)
 	return opts
 }

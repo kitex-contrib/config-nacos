@@ -52,7 +52,7 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
 		rcs := retryConfigs{}
-		err := parser.Decode(param.Type, data, rcs)
+		err := parser.Decode(param.Type, data, &rcs)
 		if err != nil {
 			klog.Warnf("[nacos] %s client nacos retry: unmarshal data %s failed: %s, skip...", dest, data, err)
 			return
