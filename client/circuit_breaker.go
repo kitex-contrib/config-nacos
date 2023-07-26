@@ -36,13 +36,19 @@ func WithCircuitBreaker(dest, src string, nacosClient nacos.Client,
 		ClientServiceName: src,
 	}, cfs...)
 
+	cbSuite := initCircuitBreaker(param, dest, src, nacosClient)
+
 	return []client.Option{
 		// the client identity is necessary when generate the key for service circuit breaker.
 		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{
 			ServiceName: src,
 		}),
-		client.WithCircuitBreaker(initCircuitBreaker(param, dest, src, nacosClient)),
+		client.WithCircuitBreaker(cbSuite),
 		client.WithCloseCallbacks(func() error {
+			err := cbSuite.Close()
+			if err != nil {
+				return err
+			}
 			// cancel the configuration listener when client is closed.
 			return nacosClient.DeregisterConfig(param)
 		}),
