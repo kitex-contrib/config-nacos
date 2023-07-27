@@ -100,8 +100,9 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 
 		for _, method := range methods {
 			key := genServiceCBKey(src, dest, method)
-			// TODO delete the method, changed to DeleteServiceCBConfig function
-			cb.UpdateServiceCBConfig(key, circuitbreak.CBConfig{})
+			cb.UpdateServiceCBConfig(key, circuitbreak.CBConfig{
+				Enable: false,
+			})
 		}
 		lastCBConfigs = configs
 	}
