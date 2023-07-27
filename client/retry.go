@@ -16,6 +16,7 @@ package client
 
 import (
 	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/cloudwego/kitex/client"
@@ -42,16 +43,17 @@ func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 	}
 }
 
-// the key is method name, wildcard "*" can match anything.
-type retryConfigs map[string]*retry.Policy
-
 func initRetryContainer(param vo.ConfigParam, dest string,
 	nacosClient nacos.Client,
 ) *retry.Container {
 	retryContainer := retry.NewRetryContainer()
 
+	ts := utils.ThreadSafeSet[*retry.Policy]{}
+
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
-		rcs := retryConfigs{}
+
+		// the key is method name, wildcard "*" can match anything.
+		rcs := map[string]*retry.Policy{}
 		err := parser.Decode(param.Type, data, &rcs)
 		if err != nil {
 			klog.Warnf("[nacos] %s client nacos retry: unmarshal data %s failed: %s, skip...", dest, data, err)
@@ -71,13 +73,15 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 			}
 			retryContainer.NotifyPolicyChange(method, *policy)
 		}
+
+		for _, method := range ts.DiffAndEmplace(rcs) {
+			retryContainer.NotifyPolicyChange(method, retry.Policy{
+				Enable: false,
+			})
+		}
 	}
 
-	nacosClient.RegisterConfigCallback(dest,
-		retryConfigName,
-		param,
-		onChangeCallback,
-	)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback)
 
 	return retryContainer
 }

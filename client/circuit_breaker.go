@@ -24,6 +24,7 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 )
 
 // WithCircuitBreaker sets the circuit breaker policy from nacos configuration center.
@@ -75,8 +76,7 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 	nacosClient nacos.Client,
 ) *circuitbreak.CBSuite {
 	cb := circuitbreak.NewCBSuite(nil)
-
-	var lastCBConfigs map[string]circuitbreak.CBConfig
+	lcb := utils.ThreadSafeSet[circuitbreak.CBConfig]{}
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
 		configs := map[string]circuitbreak.CBConfig{}
@@ -86,32 +86,20 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 			return
 		}
 
-		methods := make([]string, 0, len(lastCBConfigs))
-		for method := range lastCBConfigs {
-			if _, ok := configs[method]; !ok {
-				methods = append(methods, method)
-			}
-		}
-
 		for method, config := range configs {
 			key := genServiceCBKey(src, dest, method)
 			cb.UpdateServiceCBConfig(key, config)
 		}
 
-		for _, method := range methods {
+		for _, method := range lcb.DiffAndEmplace(configs) {
 			key := genServiceCBKey(src, dest, method)
 			cb.UpdateServiceCBConfig(key, circuitbreak.CBConfig{
 				Enable: false,
 			})
 		}
-		lastCBConfigs = configs
 	}
 
-	nacosClient.RegisterConfigCallback(dest,
-		circuitBreakerConfigName,
-		param,
-		onChangeCallback,
-	)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback)
 
 	return cb
 }

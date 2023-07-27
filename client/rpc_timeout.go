@@ -57,11 +57,7 @@ func initRPCTimeoutContainer(param vo.ConfigParam, dest string,
 		rpcTimeoutContainer.NotifyPolicyChange(configs)
 	}
 
-	nacosClient.RegisterConfigCallback(dest,
-		rpcTimeoutConfigName,
-		param,
-		onChangeCallback,
-	)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback)
 
 	return rpcTimeoutContainer
 }
