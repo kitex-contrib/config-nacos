@@ -93,9 +93,7 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 
 		for _, method := range lcb.DiffAndEmplace(configs) {
 			key := genServiceCBKey(src, dest, method)
-			cb.UpdateServiceCBConfig(key, circuitbreak.CBConfig{
-				Enable: false,
-			})
+			cb.UpdateServiceCBConfig(key, circuitbreak.GetDefaultCBConfig())
 		}
 	}
 
