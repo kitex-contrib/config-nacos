@@ -51,7 +51,6 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 	ts := utils.ThreadSafeSet[*retry.Policy]{}
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
-
 		// the key is method name, wildcard "*" can match anything.
 		rcs := map[string]*retry.Policy{}
 		err := parser.Decode(param.Type, data, &rcs)
@@ -74,6 +73,7 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 			retryContainer.NotifyPolicyChange(method, *policy)
 		}
 
+		// FIXME should delete the policy.
 		for _, method := range ts.DiffAndEmplace(rcs) {
 			retryContainer.NotifyPolicyChange(method, retry.Policy{
 				Enable: false,
