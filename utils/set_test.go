@@ -22,18 +22,18 @@ import (
 )
 
 func TestSet(t *testing.T) {
-	ts := &ThreadSafeSet[string]{}
-	m1 := Set[string]{
-		"h1": "1",
-		"h2": "2",
+	ts := &ThreadSafeSet{}
+	m1 := Set{
+		"h1": true,
+		"h2": true,
 	}
 	got := ts.DiffAndEmplace(m1)
 	assert.Equal(t, []string([]string{}), got)
 	assert.Equal(t, m1, ts.s)
 
-	m2 := Set[string]{
-		"h3": "1",
-		"h4": "2",
+	m2 := Set{
+		"h3": true,
+		"h4": true,
 	}
 	got = ts.DiffAndEmplace(m2)
 	sort.Strings(got)

@@ -48,7 +48,7 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 ) *retry.Container {
 	retryContainer := retry.NewRetryContainer()
 
-	ts := utils.ThreadSafeSet[*retry.Policy]{}
+	ts := utils.ThreadSafeSet{}
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
 		// the key is method name, wildcard "*" can match anything.
@@ -59,7 +59,9 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 			return
 		}
 
+		set := utils.Set{}
 		for method, policy := range rcs {
+			set[method] = true
 			if policy.BackupPolicy != nil && policy.FailurePolicy != nil {
 				klog.Warnf("[nacos] %s client policy for method %s BackupPolicy and FailurePolicy must not be set at same time",
 					dest, method)
@@ -73,11 +75,8 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 			retryContainer.NotifyPolicyChange(method, *policy)
 		}
 
-		// FIXME should delete the policy.
-		for _, method := range ts.DiffAndEmplace(rcs) {
-			retryContainer.NotifyPolicyChange(method, retry.Policy{
-				Enable: false,
-			})
+		for _, method := range ts.DiffAndEmplace(set) {
+			retryContainer.DeletePolicy(method)
 		}
 	}
 

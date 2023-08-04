@@ -15,32 +15,9 @@
 package client
 
 import (
-	"sync"
-
 	"github.com/cloudwego/kitex/client"
-
 	"github.com/kitex-contrib/config-nacos/nacos"
 )
-
-type ThreadSet[T comparable] struct {
-	sync.RWMutex
-	s Set[T]
-}
-
-type Set[T comparable] map[string]T
-
-func (s *ThreadSet[T]) EmplaceAndDiff(other Set[T]) []string {
-	s.Lock()
-	defer s.Unlock()
-	out := make([]string, 0, len(s.s))
-	for key := range s.s {
-		if _, ok := other[key]; !ok {
-			out = append(out, key)
-		}
-	}
-	s.s = other
-	return out
-}
 
 const (
 	retryConfigName          = "retry_config"

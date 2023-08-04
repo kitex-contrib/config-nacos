@@ -76,9 +76,10 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 	nacosClient nacos.Client,
 ) *circuitbreak.CBSuite {
 	cb := circuitbreak.NewCBSuite(nil)
-	lcb := utils.ThreadSafeSet[circuitbreak.CBConfig]{}
+	lcb := utils.ThreadSafeSet{}
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
+		set := utils.Set{}
 		configs := map[string]circuitbreak.CBConfig{}
 		err := parser.Decode(param.Type, data, &configs)
 		if err != nil {
@@ -87,11 +88,12 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 		}
 
 		for method, config := range configs {
+			set[method] = true
 			key := genServiceCBKey(src, dest, method)
 			cb.UpdateServiceCBConfig(key, config)
 		}
 
-		for _, method := range lcb.DiffAndEmplace(configs) {
+		for _, method := range lcb.DiffAndEmplace(set) {
 			key := genServiceCBKey(src, dest, method)
 			cb.UpdateServiceCBConfig(key, circuitbreak.GetDefaultCBConfig())
 		}
