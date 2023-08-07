@@ -40,10 +40,6 @@ func WithCircuitBreaker(dest, src string, nacosClient nacos.Client,
 	cbSuite := initCircuitBreaker(param, dest, src, nacosClient)
 
 	return []client.Option{
-		// the client identity is necessary when generate the key for service circuit breaker.
-		client.WithClientBasicInfo(&rpcinfo.EndpointBasicInfo{
-			ServiceName: src,
-		}),
 		client.WithCircuitBreaker(cbSuite),
 		client.WithCloseCallbacks(func() error {
 			err := cbSuite.Close()
@@ -56,16 +52,19 @@ func WithCircuitBreaker(dest, src string, nacosClient nacos.Client,
 	}
 }
 
-// Be consistent with the RPCInfo2Key function in kitex/pkg/circuitbreak/cbsuite.go.
-// NOTE The fromService should keep consistent with the ServiceName field in rpcinfo.EndpointBasicInfo
-// which can be set using client.WithClientBasicInfo function, should
-// set it correctly.
-func genServiceCBKey(fromService, toService, method string) string {
-	sum := len(fromService) + len(toService) + len(method) + 2
+// keep consistent when initialising the circuit breaker suit and updating
+// the circuit breaker policy.
+func genServiceCBKeyWithRPCInfo(ri rpcinfo.RPCInfo) string {
+	if ri == nil {
+		return ""
+	}
+	return genServiceCBKey(ri.To().ServiceName(), ri.To().Method())
+}
+
+func genServiceCBKey(toService, method string) string {
+	sum := len(toService) + len(method) + 2
 	var buf strings.Builder
 	buf.Grow(sum)
-	buf.WriteString(fromService)
-	buf.WriteByte('/')
 	buf.WriteString(toService)
 	buf.WriteByte('/')
 	buf.WriteString(method)
@@ -75,7 +74,7 @@ func genServiceCBKey(fromService, toService, method string) string {
 func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 	nacosClient nacos.Client,
 ) *circuitbreak.CBSuite {
-	cb := circuitbreak.NewCBSuite(nil)
+	cb := circuitbreak.NewCBSuite(genServiceCBKeyWithRPCInfo)
 	lcb := utils.ThreadSafeSet{}
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
@@ -89,12 +88,13 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 
 		for method, config := range configs {
 			set[method] = true
-			key := genServiceCBKey(src, dest, method)
+			key := genServiceCBKey(dest, method)
 			cb.UpdateServiceCBConfig(key, config)
 		}
 
 		for _, method := range lcb.DiffAndEmplace(set) {
-			key := genServiceCBKey(src, dest, method)
+			key := genServiceCBKey(dest, method)
+			// For deleted method configs, set to default policy
 			cb.UpdateServiceCBConfig(key, circuitbreak.GetDefaultCBConfig())
 		}
 	}
