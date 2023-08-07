@@ -16,6 +16,7 @@ package client
 
 import (
 	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/cloudwego/kitex/client"
@@ -42,23 +43,25 @@ func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 	}
 }
 
-// the key is method name, wildcard "*" can match anything.
-type retryConfigs map[string]*retry.Policy
-
 func initRetryContainer(param vo.ConfigParam, dest string,
 	nacosClient nacos.Client,
 ) *retry.Container {
 	retryContainer := retry.NewRetryContainer()
 
+	ts := utils.ThreadSafeSet{}
+
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
-		rcs := retryConfigs{}
-		err := parser.Decode(param.Type, data, rcs)
+		// the key is method name, wildcard "*" can match anything.
+		rcs := map[string]*retry.Policy{}
+		err := parser.Decode(param.Type, data, &rcs)
 		if err != nil {
 			klog.Warnf("[nacos] %s client nacos retry: unmarshal data %s failed: %s, skip...", dest, data, err)
 			return
 		}
 
+		set := utils.Set{}
 		for method, policy := range rcs {
+			set[method] = true
 			if policy.BackupPolicy != nil && policy.FailurePolicy != nil {
 				klog.Warnf("[nacos] %s client policy for method %s BackupPolicy and FailurePolicy must not be set at same time",
 					dest, method)
@@ -71,13 +74,13 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 			}
 			retryContainer.NotifyPolicyChange(method, *policy)
 		}
+
+		for _, method := range ts.DiffAndEmplace(set) {
+			retryContainer.DeletePolicy(method)
+		}
 	}
 
-	nacosClient.RegisterConfigCallback(dest,
-		retryConfigName,
-		param,
-		onChangeCallback,
-	)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback)
 
 	return retryContainer
 }

@@ -25,7 +25,7 @@ import (
 // Client the wrapper of nacos client.
 type Client interface {
 	SetParser(ConfigParser)
-	RegisterConfigCallback(string, string, vo.ConfigParam, func(string, ConfigParser))
+	RegisterConfigCallback(vo.ConfigParam, func(string, ConfigParser))
 	DeregisterConfig(vo.ConfigParam) error
 }
 
@@ -75,13 +75,12 @@ func (c *client) DeregisterConfig(cfg vo.ConfigParam) error {
 }
 
 // RegisterConfigCallback register the callback function to nacos client.
-func (c *client) RegisterConfigCallback(dest, category string,
-	param vo.ConfigParam,
+func (c *client) RegisterConfigCallback(param vo.ConfigParam,
 	callback func(string, ConfigParser),
 ) {
 	param.OnChange = func(namespace, group, dataId, data string) {
-		klog.Debugf("[nacos] %s client %s config updated, namespace %s group %s dataId %s data %s",
-			dest, category, namespace, group, dataId, data)
+		klog.Debugf("[nacos] config %s updated, namespace %s group %s dataId %s data %s",
+			param.DataId, namespace, group, dataId, data)
 		callback(data, c.parser)
 	}
 	data, err := c.ncli.GetConfig(param)
