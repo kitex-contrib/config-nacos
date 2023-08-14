@@ -24,10 +24,11 @@ import (
 
 	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
-	"github.com/cloudwego/kitex-examples/middleware/mymiddleware"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
+	"github.com/kitex-contrib/config-nacos/nacos"
+	nacosserver "github.com/kitex-contrib/config-nacos/server"
 )
 
 var _ api.Echo = &EchoImpl{}
@@ -47,12 +48,21 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	svr := echo.NewServer(
-		new(EchoImpl),
+	nacosClient, err := nacos.DefaultClient()
+	if err != nil {
+		panic(err)
+	}
+
+	opts := []server.Option{
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "echo"}),
 		server.WithRegistry(r),
-		server.WithMiddleware(mymiddleware.CommonMiddleware),
-		server.WithMiddleware(mymiddleware.ServerMiddleware),
+	}
+
+	opts = append(opts, nacosserver.NewSuite("echo", nacosClient).Options()...)
+
+	svr := echo.NewServer(
+		new(EchoImpl),
+		opts...,
 	)
 	if err := svr.Run(); err != nil {
 		log.Println("server stopped with error:", err)

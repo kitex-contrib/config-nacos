@@ -8,6 +8,69 @@
 
 ### 基本使用
 
+#### 服务端
+
+```go
+import (
+	"context"
+	"log"
+	"time"
+
+	"github.com/cloudwego/kitex-examples/kitex_gen/api"
+	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
+	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego/kitex/pkg/rpcinfo"
+	"github.com/cloudwego/kitex/server"
+
+	"github.com/kitex-contrib/registry-nacos/registry"
+	"github.com/kitex-contrib/config-nacos/nacos"
+	nacosserver "github.com/kitex-contrib/config-nacos/server"
+)
+
+var _ api.Echo = &EchoImpl{}
+
+// EchoImpl implements the last service interface defined in the IDL.
+type EchoImpl struct{}
+
+// Echo implements the Echo interface.
+func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Response, err error) {
+	klog.Info("echo called")
+	time.Sleep(2 * time.Second)
+	return &api.Response{Message: req.Message}, nil
+}
+
+func main() {
+	r, err := registry.NewDefaultNacosRegistry()
+	if err != nil {
+		panic(err)
+	}
+	nacosClient, err := nacos.DefaultClient()
+	if err != nil {
+		panic(err)
+	}
+
+	serviceName := "echo"
+
+	opts := []server.Option{
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
+		server.WithRegistry(r),
+	}
+
+	opts = append(opts, nacosserver.NewSuite(serviceName, nacosClient).Options()...)
+
+	svr := echo.NewServer(
+		new(EchoImpl),
+		opts...,
+	)
+	if err := svr.Run(); err != nil {
+		log.Println("server stopped with error:", err)
+	} else {
+		log.Println("server stopped")
+	}
+}
+
+```
+
 #### 客户端
 
 ```go
