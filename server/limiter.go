@@ -47,8 +47,7 @@ func (lc *LimiterConfig) Valid() bool {
 	return lc.ConnectionLimit > 0 || lc.QPSLimit > 0
 }
 
-// updaterWrapper can't guarantee the bootstrap order of the nacos and limiter, you
-// should make sure the limit.Updater is initialized before the update.
+// updaterWrapper the wrapper maintains the configuration and limiter updater.
 type updaterWrapper struct {
 	service string
 	updater atomic.Value
@@ -62,6 +61,9 @@ func (uw *updaterWrapper) UpdateLimit(lc *LimiterConfig) {
 		return
 	}
 	uw.opt.MaxConnections, uw.opt.MaxQPS = int(lc.ConnectionLimit), int(lc.QPSLimit)
+
+	// can't guarantee the bootstrap order of the nacos and limiter, you
+	// should make sure the limit.Updater is initialized before the update.
 	updater := uw.updater.Load()
 	if updater == nil {
 		return
