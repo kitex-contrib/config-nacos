@@ -37,7 +37,6 @@ func (lc *LimiterConfig) Valid() bool {
 // should make sure the limit.Updater is initialized before the update.
 type updaterWrapper struct {
 	service string
-	limit.Updater
 	updater atomic.Value
 	opt     limit.Option
 }
