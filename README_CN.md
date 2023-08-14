@@ -14,15 +14,12 @@
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-
-	"github.com/kitex-contrib/registry-nacos/registry"
 	"github.com/kitex-contrib/config-nacos/nacos"
 	nacosserver "github.com/kitex-contrib/config-nacos/server"
 )
@@ -35,25 +32,18 @@ type EchoImpl struct{}
 // Echo implements the Echo interface.
 func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Response, err error) {
 	klog.Info("echo called")
-	time.Sleep(2 * time.Second)
 	return &api.Response{Message: req.Message}, nil
 }
 
 func main() {
-	r, err := registry.NewDefaultNacosRegistry()
-	if err != nil {
-		panic(err)
-	}
 	nacosClient, err := nacos.DefaultClient()
 	if err != nil {
 		panic(err)
 	}
-
 	serviceName := "echo"
 
 	opts := []server.Option{
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
-		server.WithRegistry(r),
 	}
 
 	opts = append(opts, nacosserver.NewSuite(serviceName, nacosClient).Options()...)
@@ -68,44 +58,61 @@ func main() {
 		log.Println("server stopped")
 	}
 }
-
 ```
 
 #### 客户端
 
 ```go
 import (
-    // ...
+	"context"
+	"log"
+
+	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
 	"github.com/cloudwego/kitex/client"
+	"github.com/cloudwego/kitex/pkg/klog"
 	nacosclient "github.com/kitex-contrib/config-nacos/client"
 	"github.com/kitex-contrib/config-nacos/nacos"
-    // ...
+	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
 func main() {
-    // ... 
+	klog.SetLevel(klog.LevelDebug)
+
 	nacosClient, err := nacos.DefaultClient()
 	if err != nil {
 		panic(err)
 	}
+
 	fn := func(cp *vo.ConfigParam) {
-		cp.Type = vo.TEXT
+		klog.Infof("nacos config %v", cp)
 	}
+
 	opts := []client.Option{
 		client.WithHostPorts("0.0.0.0:8888"),
-		client.WithMiddleware(mymiddleware.CommonMiddleware),
-		client.WithMiddleware(mymiddleware.ClientMiddleware),
-		//client.WithResolver(r),
 	}
 
-	opts = append(opts, nacosclient.NewSuite("echo", "test", nacosClient, fn).Options()...)
+	serviceName := "echo"
+	clientName := "test"
+
+	opts = append(opts, nacosclient.NewSuite(serviceName, clientName, nacosClient, fn).Options()...)
 
 	client, err := echo.NewClient(
-		"echo",
+		serviceName,
 		opts...,
 	)
-    // ...
+	if err != nil {
+		log.Fatal(err)
+	}
+	for {
+		req := &api.Request{Message: "my request"}
+		resp, err := client.Echo(context.Background(), req)
+		if err != nil {
+			klog.Errorf("take request error: %v", err)
+		} else {
+			klog.Infof("receive response %v", resp)
+		}
+	}
 }
 ```
 

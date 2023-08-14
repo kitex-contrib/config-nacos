@@ -18,9 +18,6 @@ package main
 import (
 	"context"
 	"log"
-	"time"
-
-	"github.com/kitex-contrib/registry-nacos/registry"
 
 	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
@@ -39,26 +36,21 @@ type EchoImpl struct{}
 // Echo implements the Echo interface.
 func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Response, err error) {
 	klog.Info("echo called")
-	time.Sleep(2 * time.Second)
 	return &api.Response{Message: req.Message}, nil
 }
 
 func main() {
-	r, err := registry.NewDefaultNacosRegistry()
-	if err != nil {
-		panic(err)
-	}
 	nacosClient, err := nacos.DefaultClient()
 	if err != nil {
 		panic(err)
 	}
+	serviceName := "echo"
 
 	opts := []server.Option{
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: "echo"}),
-		server.WithRegistry(r),
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
 	}
 
-	opts = append(opts, nacosserver.NewSuite("echo", nacosClient).Options()...)
+	opts = append(opts, nacosserver.NewSuite(serviceName, nacosClient).Options()...)
 
 	svr := echo.NewServer(
 		new(EchoImpl),

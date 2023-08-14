@@ -25,16 +25,11 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	nacosclient "github.com/kitex-contrib/config-nacos/client"
 	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/registry-nacos/resolver"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
 func main() {
 	klog.SetLevel(klog.LevelDebug)
-	r, err := resolver.NewDefaultNacosResolver()
-	if err != nil {
-		panic(err)
-	}
 
 	nacosClient, err := nacos.DefaultClient()
 	if err != nil {
@@ -47,13 +42,15 @@ func main() {
 
 	opts := []client.Option{
 		client.WithHostPorts("0.0.0.0:8888"),
-		client.WithResolver(r),
 	}
 
-	opts = append(opts, nacosclient.NewSuite("echo", "test", nacosClient, fn).Options()...)
+	serviceName := "echo"
+	clientName := "test"
+
+	opts = append(opts, nacosclient.NewSuite(serviceName, clientName, nacosClient, fn).Options()...)
 
 	client, err := echo.NewClient(
-		"echo",
+		serviceName,
 		opts...,
 	)
 	if err != nil {

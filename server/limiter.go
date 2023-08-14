@@ -19,6 +19,7 @@ import (
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
+	"github.com/cloudwego/kitex/pkg/limiter"
 	"github.com/cloudwego/kitex/server"
 	"github.com/kitex-contrib/config-nacos/nacos"
 	"github.com/nacos-group/nacos-sdk-go/vo"
@@ -36,17 +37,6 @@ func WithLimiter(dest string, nacosClient nacos.Client,
 	return server.WithLimit(initLimitOptions(param, dest, nacosClient))
 }
 
-// LimiterConfig the limiter config
-type LimiterConfig struct {
-	ConnectionLimit int64 `json:"connection_limit"`
-	QPSLimit        int64 `json:"qps_limit"`
-}
-
-// Valid checks if the config is valid.
-func (lc *LimiterConfig) Valid() bool {
-	return lc.ConnectionLimit > 0 || lc.QPSLimit > 0
-}
-
 // updaterWrapper the wrapper maintains the configuration and limiter updater.
 type updaterWrapper struct {
 	service string
@@ -55,12 +45,13 @@ type updaterWrapper struct {
 }
 
 // UpdateLimit update the limiter.
-func (uw *updaterWrapper) UpdateLimit(lc *LimiterConfig) {
-	if !lc.Valid() {
+func (uw *updaterWrapper) UpdateLimit(lc *limiter.LimiterConfig) {
+	uw.opt.MaxConnections, uw.opt.MaxQPS = int(lc.ConnectionLimit), int(lc.QPSLimit)
+
+	if !uw.opt.Valid() {
 		klog.Warnf("[nacos] %s server nacos limiter config is invalid %v skip...", uw.service, uw.opt)
 		return
 	}
-	uw.opt.MaxConnections, uw.opt.MaxQPS = int(lc.ConnectionLimit), int(lc.QPSLimit)
 
 	// can't guarantee the bootstrap order of the nacos and limiter, you
 	// should make sure the limit.Updater is initialized before the update.
@@ -85,7 +76,7 @@ func initLimitOptions(param vo.ConfigParam, dest string, nacosClient nacos.Clien
 	}
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
-		lc := &LimiterConfig{}
+		lc := &limiter.LimiterConfig{}
 		err := parser.Decode(param.Type, data, lc)
 		if err != nil {
 			klog.Warnf("[nacos] %s server nacos limiter config: unmarshal data %s failed: %s, skip...", dest, data, err)
