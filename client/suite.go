@@ -20,9 +20,9 @@ import (
 )
 
 const (
-	retryConfigName          = "retry_config"
+	retryConfigName          = "retry"
 	rpcTimeoutConfigName     = "rpc_timeout"
-	circuitBreakerConfigName = "cb_config"
+	circuitBreakerConfigName = "circuit_break"
 )
 
 // NacosClientSuite nacos client config suite, configure retry timeout limit and circuitbreak dynamically from nacos.

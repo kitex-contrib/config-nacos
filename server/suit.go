@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	limiterConfigName = "limiter_config"
+	limiterConfigName = "limit"
 )
 
 // NacosServerSuite nacos server config suite, configure limiter config dynamically from nacos.

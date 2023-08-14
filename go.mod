@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/cloudwego/kitex v0.6.2-0.20230804065152-067aad9c9eef
 	github.com/cloudwego/kitex-examples v0.2.0
-	github.com/kitex-contrib/registry-nacos v0.1.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/stretchr/testify v1.8.2
 	sigs.k8s.io/yaml v1.3.0
@@ -26,7 +25,7 @@ require (
 	github.com/cloudwego/frugal v0.1.7 // indirect
 	github.com/cloudwego/localsession v0.0.2 // indirect
 	github.com/cloudwego/netpoll v0.4.1 // indirect
-	github.com/cloudwego/thriftgo v0.2.13-0.20230804030519-2ce040e1b8ba // indirect
+	github.com/cloudwego/thriftgo v0.2.13-0.20230810055903-6b19b1a3a8ca // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
@@ -62,3 +61,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/cloudwego/kitex => github.com/whalecold/kitex v0.0.0-20230814100831-4a70f2208f56
