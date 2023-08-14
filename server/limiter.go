@@ -33,7 +33,7 @@ func WithLimiter(dest string, nacosClient nacos.Client,
 		ServerServiceName: dest,
 	}, cfs...)
 
-	return server.WithLimit(initLimiteOptions(param, dest, nacosClient))
+	return server.WithLimit(initLimitOptions(param, dest, nacosClient))
 }
 
 // LimiterConfig the limiter config
@@ -73,7 +73,7 @@ func (uw *updaterWrapper) UpdateLimit(lc *LimiterConfig) {
 	}
 }
 
-func initLimiteOptions(param vo.ConfigParam, dest string, nacosClient nacos.Client) *limit.Option {
+func initLimitOptions(param vo.ConfigParam, dest string, nacosClient nacos.Client) *limit.Option {
 	uw := updaterWrapper{
 		service: dest,
 	}
