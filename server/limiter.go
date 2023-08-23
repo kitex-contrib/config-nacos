@@ -15,6 +15,8 @@
 package server
 
 import (
+	"sync/atomic"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/limiter"
@@ -37,7 +39,13 @@ func WithLimiter(dest string, nacosClient nacos.Client,
 }
 
 func initLimitOptions(param vo.ConfigParam, dest string, nacosClient nacos.Client) *limit.Option {
-	opt := limit.DefaultOption()
+	var updater atomic.Value
+	opt := &limit.Option{}
+	opt.UpdateControl = func(u limit.Updater) {
+		klog.Debugf("[nacos] %s server nacos limiter updater init, config %v", dest, *opt)
+		u.UpdateLimit(opt)
+		updater.Store(u)
+	}
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
 		lc := &limiter.LimiterConfig{}
 		err := parser.Decode(param.Type, data, lc)
@@ -45,8 +53,15 @@ func initLimitOptions(param vo.ConfigParam, dest string, nacosClient nacos.Clien
 			klog.Warnf("[nacos] %s server nacos limiter config: unmarshal data %s failed: %s, skip...", dest, data, err)
 			return
 		}
-		if !opt.UpdateLimitConfig(int(lc.ConnectionLimit), int(lc.QPSLimit)) {
-			klog.Warnf("[nacos] %s server nacos limiter config: data %s may do not take affect", dest, data, err)
+		opt.MaxConnections = int(lc.ConnectionLimit)
+		opt.MaxQPS = int(lc.QPSLimit)
+		u := updater.Load()
+		if u == nil {
+			klog.Warnf("[nacos] %s server nacos limiter config failed as the updater is empty", dest)
+			return
+		}
+		if !u.(limit.Updater).UpdateLimit(opt) {
+			klog.Warnf("[nacos] %s server nacos limiter config: data %s may do not take affect", dest, data)
 		}
 	}
 
