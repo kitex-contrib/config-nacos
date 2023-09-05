@@ -115,16 +115,131 @@ func main() {
 	}
 }
 ```
+### Nacos 配置
 
-### 环境变量
+client 根据环境变量获取到 nacos 的 addr, port 以及 namespace 链接到 nacos 服务器上，建立链接之后 suite 会根据 configGroup 以及 configDataId 订阅对应的配置并动态更新自身策略，具体参数参考下面环境变量。 
+
+配置的格式默认支持 `json` 和 `yaml`，可以使用函数 `SetParser` 进行自定义格式解析方式，并在 `NewSuite` 的时候使用 `CustomFunction` 函数修改订阅函数的格式。
+
+#### 环境变量
 
 | 变量名 | 变量默认值 | 作用 |
 | ------------------------- | ---------------------------------- | --------------------------------- |
 | serverAddr               | 127.0.0.1                          | nacos 服务器地址 |
 | serverPort               | 8848                               | nacos 服务器端口            |
 | namespace                 |                                    | nacos 中的 namespace Id |
-| configDataId              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | the  format of config data id          |
-| configGroup               | DEFAULT_GROUP                      | the group of config data          |
+| configDataId              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | 使用 go [template](https://pkg.go.dev/text/template) 语法渲染生成对应的 ID, 使用 `ClientServiceName` `ServiceName` `Category` 三个元数据，可以自定义          |
+| configGroup               | DEFAULT_GROUP                      | 使用固定值，也可以动态渲染，用法同 configDataId          |
+
+#### 治理策略
+
+下面例子中的 configDataId 以及 configGroup 均使用默认值，服务名称为 echo，客户端名称为 requester
+
+##### 限流 Category=limit
+> 限流目前只支持服务端，所以 ClientServiceName 为空。
+
+[JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/limiter/item_limiter.go#L33)
+
+例子：
+```
+configDataID: .echo.limit
+{
+  "connection_limit": 11, // 最大100并发
+  "qps_limit": 2000       // 每 100ms 内最大 2000QPS
+}
+```
+注：
+
+- 限流配置的粒度是 Server 全局，不分 client、method
+- 「未配置」或「取值为 0」表示不开启
+- connection_limit 和 qps_limit 可以独立配置，例如 connection_limit = 100, qps_limit = 0
+
+##### 重试 Category=retry
+
+[JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/retry/policy.go#L63)
+
+例子：
+```
+configDataId: requester.echo.retry
+{
+    "*": {  // * 默认值，如果不配置全部 fallback 到这个策略
+        "enable": true,
+        "type": 0,        // 失败重试(type=0)         
+        "failure_policy": {
+            "stop_policy": {
+                "max_retry_times": 3,
+                "max_duration_ms": 2000,
+                "cb_policy": {
+                    "error_rate": 0.5
+                }
+            },
+            "backoff_policy": {
+                "backoff_type": "fixed",
+                "cfg_items": {
+                    "fix_ms": 50
+                }
+            }
+        }
+    },
+    "echo": { // 请求方法名称，要转成全小写
+        "enable": true,
+        "type": 1,  // 备用请求(type=1)               
+        "failure_policy": {
+            "stop_policy": {
+                "max_retry_times": 3,
+                "max_duration_ms": 2000,
+                "cb_policy": {
+                    "error_rate": 0.5
+                }
+            },
+            "backoff_policy": {
+                "backoff_type": "fixed",
+                "cfg_items": {
+                    "fix_ms": 50
+                }
+            }
+        }
+    }
+}
+```
+注：retry.Container 内置支持用 * 通配符指定默认配置（详见 [getRetryer](https://github.com/cloudwego/kitex/blob/v0.5.1/pkg/retry/retryer.go#L240) 方法）
+
+##### 超时 Category=rpc_timeout
+
+[JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/rpctimeout/item_rpc_timeout.go#L42)
+
+例子：
+```
+configDataId: requester.echo.rpc_timeout
+{
+  "*": {
+    "conn_timeout_ms": 100, // 其他方法连接超时 100ms、请求超时 3s
+    "rpc_timeout_ms": 3000
+  },
+  "echo": {
+    "conn_timeout_ms": 50, // Echo 方法链接超时 50ms、请求超时 1s，
+    "rpc_timeout_ms": 1000
+  }
+}
+```
+注：kitex 的熔断实现目前不支持修改全局默认配置（详见 [initServiceCB](https://github.com/cloudwego/kitex/blob/v0.5.1/pkg/circuitbreak/cbsuite.go#L195)）
+
+##### 熔断: Category=circuit_break
+
+[JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/circuitbreak/item_circuit_breaker.go#L30)
+
+例子：
+```
+Echo 方法使用下面的配置（0.3、100），其他方法使用全局默认配置（0.5、200）
+configDataId: `requester.echo.circuit_break`
+{
+  "Echo": {
+    "enable": true,
+    "err_rate": 0.3, 错误率
+    "min_sample": 100 最小的统计个数
+  }
+}
+```
 
 ### 更多信息
 
