@@ -32,7 +32,8 @@ type EchoImpl struct{}
 // Echo implements the Echo interface.
 func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Response, err error) {
 	klog.Info("echo called")
-	return &api.Response{Message: req.Message}, nil }
+	return &api.Response{Message: req.Message}, nil 
+}
 
 func main() {
 	nacosClient, err := nacos.DefaultClient()
@@ -144,8 +145,8 @@ Example:
 ```
 configDataID: .echo.limit
 {
-  "connection_limit": 11, // Maximum 100 concurrent connections
-  "qps_limit": 2000       // Maximum 2000QPS per 100ms
+  "connection_limit": 100, // Maximum 100 concurrent connections
+  "qps_limit": 2000        // Maximum 2000 QPS per 100ms
 }
 ```
 

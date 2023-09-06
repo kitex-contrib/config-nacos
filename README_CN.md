@@ -144,8 +144,8 @@ client 根据环境变量获取到 nacos 的 addr, port 以及 namespace 链接�
 ```
 configDataID: .echo.limit
 {
-  "connection_limit": 11, // 最大100并发
-  "qps_limit": 2000       // 每 100ms 内最大 2000QPS
+  "connection_limit": 100, // 最大100并发
+  "qps_limit": 2000        // 每 100ms 内最大 2000QPS
 }
 ```
 注：
