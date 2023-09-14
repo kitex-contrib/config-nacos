@@ -3,7 +3,7 @@ module github.com/kitex-contrib/config-nacos
 go 1.19
 
 require (
-	github.com/cloudwego/kitex v0.6.2-0.20230825063748-0068e34282a5
+	github.com/cloudwego/kitex v0.7.1
 	github.com/cloudwego/kitex-examples v0.2.0
 	github.com/nacos-group/nacos-sdk-go v1.1.4
 	github.com/stretchr/testify v1.8.2
@@ -20,7 +20,7 @@ require (
 	github.com/chenzhuoyu/iasm v0.9.0 // indirect
 	github.com/choleraehyq/pid v0.0.17 // indirect
 	github.com/cloudwego/configmanager v0.2.0 // indirect
-	github.com/cloudwego/dynamicgo v0.1.2 // indirect
+	github.com/cloudwego/dynamicgo v0.1.3 // indirect
 	github.com/cloudwego/fastpb v0.0.4 // indirect
 	github.com/cloudwego/frugal v0.1.7 // indirect
 	github.com/cloudwego/localsession v0.0.2 // indirect
