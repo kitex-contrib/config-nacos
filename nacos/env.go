@@ -15,10 +15,8 @@
 package nacos
 
 import (
-	"bytes"
 	"os"
 	"strconv"
-	"text/template"
 
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
@@ -26,14 +24,13 @@ import (
 )
 
 const (
-	NACOS_ENV_SERVER_ADDR      = "serverAddr"
-	NACOS_ENV_PORT             = "serverPort"
-	NACOS_ENV_NAMESPACE_ID     = "namespace"
-	NACOS_ENV_CONFIG_GROUP     = "configGroup"
-	NACOS_ENV_CONFIG_DATA_ID   = "configDataId"
+	NACOS_ENV_SERVER_ADDR      = "KITEX_CONFIG_NACOS_SERVER_ADDR"
+	NACOS_ENV_PORT             = "KITEX_CONFIG_NACOS_SERVER_PORT"
+	NACOS_ENV_NAMESPACE_ID     = "KITEX_CONFIG_NACOS_NAMESPACE"
+	NACOS_ENV_CONFIG_GROUP     = "KITEX_CONFIG_NACOS_GROUP"
+	NACOS_ENV_CONFIG_DATA_ID   = "KITEX_CONFIG_NACOS_DATA_ID"
 	NACOS_DEFAULT_SERVER_ADDR  = "127.0.0.1"
 	NACOS_DEFAULT_PORT         = 8848
-	NACOS_DEFAULT_REGIONID     = "cn-hangzhou"
 	NACOS_DEFAULT_CONFIG_GROUP = "DEFAULT_GROUP"
 	NACOS_DEFAULT_DATA_ID      = "{{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}"
 )
@@ -53,41 +50,8 @@ type ConfigParamConfig struct {
 	ServerServiceName string
 }
 
-func render(name, format string, cpc *ConfigParamConfig) string {
-	t, err := template.New(name).Parse(format)
-	if err != nil {
-		panic(err)
-	}
-	var tpl bytes.Buffer
-	err = t.Execute(&tpl, cpc)
-	if err != nil {
-		panic(err)
-	}
-	return tpl.String()
-}
-
-// NacosConfigParam Get nacos config from environment variables. All the parameters can be customized with CustomFunction.
-// ConfigParam explain:
-//  1. Type: data format, support JSON and YAML, JSON by default. Could extend it by implementing the ConfigParser interface.
-//  2. Content: empty by default. Customize with CustomFunction.
-//  3. Group: DEFAULT_GROUP by default.
-//  4. DataId: {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}} by default. Customize it by CustomFunction or
-//     use specified format. ref: nacos/env.go:46
-func NacosConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) vo.ConfigParam {
-	param := vo.ConfigParam{
-		DataId:  render("dataId", NacosConfigDataId(), cpc),
-		Group:   render("group", NacosConfigGroup(), cpc),
-		Type:    vo.JSON,
-		Content: defaultContent,
-	}
-	for _, cf := range cfs {
-		cf(&param)
-	}
-	return param
-}
-
-// NacosConfigDataId Get nacos DataId from environment variables
-func NacosConfigDataId() string {
+// nacosConfigDataId Get nacos DataId from environment variables
+func nacosConfigDataId() string {
 	dataId := os.Getenv(NACOS_ENV_CONFIG_DATA_ID)
 	if len(dataId) == 0 {
 		return NACOS_DEFAULT_DATA_ID
@@ -95,8 +59,8 @@ func NacosConfigDataId() string {
 	return dataId
 }
 
-// NacosConfigGroup Get nacos config group from environment variables
-func NacosConfigGroup() string {
+// nacosConfigGroup Get nacos config group from environment variables
+func nacosConfigGroup() string {
 	configGroup := os.Getenv(NACOS_ENV_CONFIG_GROUP)
 	if len(configGroup) == 0 {
 		return NACOS_DEFAULT_CONFIG_GROUP
@@ -104,8 +68,8 @@ func NacosConfigGroup() string {
 	return configGroup
 }
 
-// NacosPort Get Nacos port from environment variables
-func NacosPort() int64 {
+// nacosPort Get Nacos port from environment variables
+func nacosPort() int64 {
 	portText := os.Getenv(NACOS_ENV_PORT)
 	if len(portText) == 0 {
 		return NACOS_DEFAULT_PORT
@@ -118,8 +82,8 @@ func NacosPort() int64 {
 	return port
 }
 
-// NacosAddr Get Nacos addr from environment variables
-func NacosAddr() string {
+// nacosAddr Get Nacos addr from environment variables
+func nacosAddr() string {
 	addr := os.Getenv(NACOS_ENV_SERVER_ADDR)
 	if len(addr) == 0 {
 		return NACOS_DEFAULT_SERVER_ADDR
@@ -127,7 +91,7 @@ func NacosAddr() string {
 	return addr
 }
 
-// NacosNameSpaceId Get Nacos namespace id from environment variables
-func NacosNameSpaceId() string {
+// nacosNameSpaceId Get Nacos namespace id from environment variables
+func nacosNameSpaceId() string {
 	return os.Getenv(NACOS_ENV_NAMESPACE_ID)
 }

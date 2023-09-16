@@ -17,27 +17,14 @@ package nacos
 import (
 	"testing"
 
-	"github.com/nacos-group/nacos-sdk-go/vo"
 	"github.com/stretchr/testify/assert"
 )
 
 // TestEnvFunc test env func
 func TestEnvFunc(t *testing.T) {
-	cpc := &ConfigParamConfig{
-		Category:          "retry",
-		ServerServiceName: "svc",
-		ClientServiceName: "cli",
-	}
-
-	assert.Equal(t, int64(8848), NacosPort())
-	assert.Equal(t, "127.0.0.1", NacosAddr())
-	assert.Equal(t, "", NacosNameSpaceId())
-	assert.Equal(t, vo.ConfigParam{
-		Type:    vo.JSON,
-		Group:   NACOS_DEFAULT_CONFIG_GROUP,
-		Content: defaultContent,
-		DataId:  "cli.svc.retry",
-	}, NacosConfigParam(cpc))
+	assert.Equal(t, int64(8848), nacosPort())
+	assert.Equal(t, "127.0.0.1", nacosAddr())
+	assert.Equal(t, "", nacosNameSpaceId())
 
 	t.Setenv(NACOS_ENV_NAMESPACE_ID, "ns")
 	t.Setenv(NACOS_ENV_SERVER_ADDR, "1.1.1.1")
@@ -45,13 +32,7 @@ func TestEnvFunc(t *testing.T) {
 	t.Setenv(NACOS_ENV_CONFIG_DATA_ID, "{{.ClientServiceName}}")
 	t.Setenv(NACOS_ENV_CONFIG_GROUP, "{{.Category}}")
 
-	assert.Equal(t, int64(80), NacosPort())
-	assert.Equal(t, "1.1.1.1", NacosAddr())
-	assert.Equal(t, "ns", NacosNameSpaceId())
-	assert.Equal(t, vo.ConfigParam{
-		Type:    vo.JSON,
-		Group:   "retry",
-		Content: defaultContent,
-		DataId:  "cli",
-	}, NacosConfigParam(cpc))
+	assert.Equal(t, int64(80), nacosPort())
+	assert.Equal(t, "1.1.1.1", nacosAddr())
+	assert.Equal(t, "ns", nacosNameSpaceId())
 }

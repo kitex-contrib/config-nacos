@@ -31,7 +31,7 @@ import (
 func main() {
 	klog.SetLevel(klog.LevelDebug)
 
-	nacosClient, err := nacos.DefaultClient()
+	nacosClient, err := nacos.New(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
@@ -40,18 +40,12 @@ func main() {
 		klog.Infof("nacos config %v", cp)
 	}
 
-	opts := []client.Option{
-		client.WithHostPorts("0.0.0.0:8888"),
-	}
-
 	serviceName := "echo"
 	clientName := "test"
-
-	opts = append(opts, nacosclient.NewSuite(serviceName, clientName, nacosClient, fn).Options()...)
-
 	client, err := echo.NewClient(
 		serviceName,
-		opts...,
+		client.WithHostPorts("0.0.0.0:8888"),
+		client.WithSuite(nacosclient.NewSuite(serviceName, clientName, nacosClient, fn)),
 	)
 	if err != nil {
 		log.Fatal(err)

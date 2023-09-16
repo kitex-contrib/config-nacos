@@ -11,6 +11,8 @@ Nacos as config centre.
 #### Server
 
 ```go
+package main
+
 import (
 	"context"
 	"log"
@@ -32,25 +34,20 @@ type EchoImpl struct{}
 // Echo implements the Echo interface.
 func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Response, err error) {
 	klog.Info("echo called")
-	return &api.Response{Message: req.Message}, nil 
+	return &api.Response{Message: req.Message}, nil
 }
 
 func main() {
-	nacosClient, err := nacos.DefaultClient()
+	klog.SetLevel(klog.LevelDebug)
+	nacosClient, err := nacos.New(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
-	serviceName := "echo"
-
-	opts := []server.Option{
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
-	}
-
-	opts = append(opts, nacosserver.NewSuite(serviceName, nacosClient).Options()...)
-
+	serviceName := "server"
 	svr := echo.NewServer(
 		new(EchoImpl),
-		opts...,
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
+		server.WithSuite(nacosserver.NewSuite(serviceName, nacosClient)),
 	)
 	if err := svr.Run(); err != nil {
 		log.Println("server stopped with error:", err)
@@ -63,6 +60,8 @@ func main() {
 #### Client
 
 ```go
+package main
+
 import (
 	"context"
 	"log"
@@ -79,7 +78,7 @@ import (
 func main() {
 	klog.SetLevel(klog.LevelDebug)
 
-	nacosClient, err := nacos.DefaultClient()
+	nacosClient, err := nacos.New(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
@@ -88,18 +87,12 @@ func main() {
 		klog.Infof("nacos config %v", cp)
 	}
 
-	opts := []client.Option{
-		client.WithHostPorts("0.0.0.0:8888"),
-	}
-
-	serviceName := "echo"
-	clientName := "test"
-
-	opts = append(opts, nacosclient.NewSuite(serviceName, clientName, nacosClient, fn).Options()...)
-
+	serviceName := "server"
+	clientName := "client"
 	client, err := echo.NewClient(
 		serviceName,
-		opts...,
+		client.WithHostPorts("0.0.0.0:8888"),
+		client.WithSuite(nacosclient.NewSuite(serviceName, clientName, nacosClient, fn)),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -118,35 +111,40 @@ func main() {
 
 ### Nacos Configuration
 
-The client obtains the nacos address, port and namespace from the environment variables and connects to the nacos server. After the connection is established, the suite subscribes to the appropriate configuration based on configGroup and configDataId and dynamically updates its own policy. See the environment variables below for specific parameters.
+The client is initialized according to the parameters of `Options` and connects to the nacos server. If the parameters are empty, the addr, port and namespace of nacos are obtained from the environment variables. After the connection is established, the suite subscribes the appropriate configuration based on `configGroup` and `configDataId` to updates its own policy dynamically. See the environment variables below for specific parameters.
 
-The configured format supports `json` and `yaml` by default. You can use the `SetParser` function to customise the format parsing method, and the `CustomFunction` function to customise the format of the subscription function during `NewSuite`.
+The configuration format supports `json` and `yaml`. You can use the [SetParser](https://github.com/kitex-contrib/config-nacos/blob/eb006978517678dd75a81513142d3faed6a66f8d/nacos/nacos.go#L68) function to customise the format parsing method, and the `CustomFunction` function to customise the format of the subscription function during `NewSuite`.
 ####
 
 #### Environment Variable
 
 | Environment Variable Name | Environment Variable Default Value | Environment Variable Introduction |
 | ------------------------- | ---------------------------------- | --------------------------------- |
-| serverAddr                | 127.0.0.1                          | nacos server address              |
-| serverPort                | 8848                               | nacos server port                 |
-| namespace                 |                                    | the namespaceId of nacos          |
-| configDataId              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | Use go [template](https://pkg.go.dev/text/template) syntax rendering to generate the appropriate ID, and use `ClientServiceName` `ServiceName` `Category` three metadata that can be customised          |
-| configGroup               | DEFAULT_GROUP                      | Use fixed values or dynamic rendering. Usage is the same as configDataId.          |
+| KITEX_CONFIG_NACOS_SERVER_ADDR                | 127.0.0.1                          | Nacos server address              |
+| KITEX_CONFIG_NACOS_SERVER_PORT                | 8848                               | Nacos server port                 |
+| KITEX_CONFIG_NACOS_NAMESPACE                 |                                    | The namespaceId of nacos          |
+| KITEX_CONFIG_NACOS_DATA_ID              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | Use go [template](https://pkg.go.dev/text/template) syntax rendering to generate the appropriate ID, and use `ClientServiceName` `ServiceName` `Category` three metadata that can be customised          |
+| KITEX_CONFIG_NACOS_GROUP               | DEFAULT_GROUP                      | Use fixed values or dynamic rendering. Usage is the same as configDataId.          |
 
 #### Governance Policy
-> The configDataId and configGroup in the following example use default values, the service name is echo and the client name is requester.
+> The configDataId and configGroup in the following example use default values, the service name is `ServiceName` and the client name is `ClientName`.
 
 ##### Rate Limit Category=limit
 > Currently, current limiting only supports the server side, so ClientServiceName is empty.
 
 [JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/limiter/item_limiter.go#L33)
 
+|Variable|Introduction|
+|----|----|
+|connection_limit| Maximum concurrent connections | 
+|qps_limit| Maximum request number every 100ms | 
 Example:
 ```
-configDataID: .echo.limit
+configDataID: ServiceName.limit
+
 {
-  "connection_limit": 100, // Maximum 100 concurrent connections
-  "qps_limit": 2000        // Maximum 2000 QPS per 100ms
+  "connection_limit": 100,
+  "qps_limit": 2000
 }
 ```
 
@@ -159,13 +157,18 @@ Note:
 ##### Retry Policy Category=retry
 [JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/retry/policy.go#L63)
 
+|Variable|Introduction|
+|----|----|
+|type| 0: failure_policy 1: backup_policy| 
+|failure_policy.backoff_policy| Can only be set one of `fixed` `none` `random` | 
+
 Example：
 ```
-configDataId: requester.echo.retry
+configDataId: ClientName.ServiceName.retry
 {
-    "*": {  // * default value, If you do not configure all fallbacks to this policy
+    "*": {  
         "enable": true,
-        "type": 0,        // failed retry(type=0)         
+        "type": 0,                 
         "failure_policy": {
             "stop_policy": {
                 "max_retry_times": 3,
@@ -175,35 +178,32 @@ configDataId: requester.echo.retry
                 }
             },
             "backoff_policy": {
-                "backoff_type": "fixed",
+                "backoff_type": "fixed", 
                 "cfg_items": {
                     "fix_ms": 50
                 }
-            }
+            },
+            "retry_same_node": false
         }
     },
-    "echo": { // the method, lower-case
+    "echo": { 
         "enable": true,
-        "type": 1,  // backoff_policy(type=1)               
-        "failure_policy": {
+        "type": 1,                 
+        "backup_policy": {
+            "retry_delay_ms": 100,
+            "retry_same_node": false,
             "stop_policy": {
-                "max_retry_times": 3,
-                "max_duration_ms": 2000,
+                "max_retry_times": 2,
+                "max_duration_ms": 300,
                 "cb_policy": {
-                    "error_rate": 0.5
-                }
-            },
-            "backoff_policy": {
-                "backoff_type": "fixed",
-                "cfg_items": {
-                    "fix_ms": 50
+                    "error_rate": 0.2
                 }
             }
         }
     }
 }
 ```
-Note: retry.Container has built-in support for specifying the default configuration using the * wildcard (see the [getRetryer](https://github.com/cloudwego/kitex/blob/v0.5.1/pkg/retry/retryer.go#L240) method for details).
+Note: retry.Container has built-in support for specifying the default configuration using the `*` wildcard (see the [getRetryer](https://github.com/cloudwego/kitex/blob/v0.5.1/pkg/retry/retryer.go#L240) method for details).
 
 ##### RPC Timeout Category=rpc_timeout
 
@@ -211,7 +211,7 @@ Note: retry.Container has built-in support for specifying the default configurat
 
 Example：
 ```
-configDataId: requester.echo.rpc_timeout
+configDataId: ClietnName.ServiceName.rpc_timeout
 {
   "*": {
     "conn_timeout_ms": 100,
@@ -229,10 +229,13 @@ Note: The circuit breaker implementation of kitex does not currently support cha
 
 [JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/circuitbreak/item_circuit_breaker.go#L30)
 
+|Variable|Introduction|
+|----|----|
+|min_sample| Minimum statistical sample number| 
 Example：
 ```
 The Echo method uses the following configuration (0.3, 100) and other methods use the global default configuration (0.5, 200)
-configDataId: `requester.echo.circuit_break`
+configDataId: `ClientName.ServiecName.circuit_break`
 {
   "Echo": {
     "enable": true,
