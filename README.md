@@ -238,10 +238,10 @@ Note: The circuit breaker implementation of kitex does not currently support cha
 |min_sample| Minimum statistical sample number| 
 Example：
 ```
-The Echo method uses the following configuration (0.3, 100) and other methods use the global default configuration (0.5, 200)
+The echo method uses the following configuration (0.3, 100) and other methods use the global default configuration (0.5, 200)
 configDataId: `ClientName.ServiecName.circuit_break`
 {
-  "Echo": {
+  "echo": {
     "enable": true,
     "err_rate": 0.3, 
     "min_sample": 100 

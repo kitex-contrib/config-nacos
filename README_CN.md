@@ -238,10 +238,10 @@ configDataId: ClientName.ServiceName.rpc_timeout
 |min_sample| 最小的统计样本数| 
 例子：
 ```
-Echo 方法使用下面的配置（0.3、100），其他方法使用全局默认配置（0.5、200）
+echo 方法使用下面的配置（0.3、100），其他方法使用全局默认配置（0.5、200）
 configDataId: `ClientName.ServiceName.circuit_break`
 {
-  "Echo": {
+  "echo": {
     "enable": true,
     "err_rate": 0.3, 
     "min_sample": 100 
