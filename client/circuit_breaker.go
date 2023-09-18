@@ -31,7 +31,7 @@ import (
 func WithCircuitBreaker(dest, src string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) []client.Option {
-	param, err := nacosClient.NacosConfigParam(&nacos.ConfigParamConfig{
+	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          circuitBreakerConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,

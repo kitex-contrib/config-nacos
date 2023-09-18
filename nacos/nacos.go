@@ -16,7 +16,6 @@ package nacos
 
 import (
 	"bytes"
-	"strings"
 	"text/template"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -30,7 +29,8 @@ import (
 // Client the wrapper of nacos client.
 type Client interface {
 	SetParser(ConfigParser)
-	NacosConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error)
+	ClientConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error)
+	ServerConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error)
 	RegisterConfigCallback(vo.ConfigParam, func(string, ConfigParser))
 	DeregisterConfig(vo.ConfigParam) error
 }
@@ -38,21 +38,23 @@ type Client interface {
 type client struct {
 	ncli config_client.IConfigClient
 	// support customise parser
-	parser         ConfigParser
-	groupTemplate  *template.Template
-	dataIDTemplate *template.Template
+	parser               ConfigParser
+	groupTemplate        *template.Template
+	serverDataIDTemplate *template.Template
+	clientDataIDTemplate *template.Template
 }
 
 // Options nacos config options. All the fields have default value.
 type Options struct {
-	Address      string
-	Port         uint64
-	NamespaceID  string
-	RegionID     string
-	Group        string
-	DataIDFormat string
-	CustomLogger logger.Logger
-	ConfigParser ConfigParser
+	Address            string
+	Port               uint64
+	NamespaceID        string
+	RegionID           string
+	Group              string
+	ServerDataIDFormat string
+	ClientDataIDFormat string
+	CustomLogger       logger.Logger
+	ConfigParser       ConfigParser
 }
 
 // New Create a default Nacos client
@@ -60,13 +62,10 @@ type Options struct {
 // See: env.go
 func New(opts Options) (Client, error) {
 	if opts.Address == "" {
-		opts.Address = nacosAddr()
+		opts.Address = NacosDefaultServerAddr
 	}
 	if opts.Port == 0 {
-		opts.Port = uint64(nacosPort())
-	}
-	if opts.NamespaceID == "" {
-		opts.NamespaceID = nacosNameSpaceId()
+		opts.Port = NacosDefaultPort
 	}
 	if opts.CustomLogger == nil {
 		opts.CustomLogger = NewCustomNacosLogger()
@@ -75,10 +74,13 @@ func New(opts Options) (Client, error) {
 		opts.ConfigParser = defaultConfigParse()
 	}
 	if opts.Group == "" {
-		opts.Group = nacosConfigGroup()
+		opts.Group = NacosDefaultConfigGroup
 	}
-	if opts.DataIDFormat == "" {
-		opts.DataIDFormat = nacosConfigDataId()
+	if opts.ServerDataIDFormat == "" {
+		opts.ServerDataIDFormat = NacosDefaultServerDataID
+	}
+	if opts.ClientDataIDFormat == "" {
+		opts.ClientDataIDFormat = NacosDefaultClientDataID
 	}
 
 	sc := []constant.ServerConfig{
@@ -103,15 +105,20 @@ func New(opts Options) (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	dataIDTemplate, err := template.New("dataID").Parse(opts.DataIDFormat)
+	serverDataIDTemplate, err := template.New("serverDataID").Parse(opts.ServerDataIDFormat)
+	if err != nil {
+		return nil, err
+	}
+	clientDataIDTemplate, err := template.New("clientDataID").Parse(opts.ClientDataIDFormat)
 	if err != nil {
 		return nil, err
 	}
 	c := &client{
-		ncli:           nacosClient,
-		parser:         opts.ConfigParser,
-		groupTemplate:  groupTemplate,
-		dataIDTemplate: dataIDTemplate,
+		ncli:                 nacosClient,
+		parser:               opts.ConfigParser,
+		groupTemplate:        groupTemplate,
+		serverDataIDTemplate: serverDataIDTemplate,
+		clientDataIDTemplate: clientDataIDTemplate,
 	}
 	return c, nil
 }
@@ -121,49 +128,46 @@ func (c *client) SetParser(parser ConfigParser) {
 	c.parser = parser
 }
 
-func (c *client) renderGroup(cpc *ConfigParamConfig) (string, error) {
+func (c *client) render(cpc *ConfigParamConfig, t *template.Template) (string, error) {
 	var tpl bytes.Buffer
-	err := c.groupTemplate.Execute(&tpl, cpc)
+	err := t.Execute(&tpl, cpc)
 	if err != nil {
 		return "", err
 	}
 	return tpl.String(), nil
 }
 
-func (c *client) renderDataID(cpc *ConfigParamConfig) (string, error) {
-	var tpl bytes.Buffer
-	err := c.dataIDTemplate.Execute(&tpl, cpc)
-	if err != nil {
-		return "", err
-	}
-	return tpl.String(), nil
+// ServerConfigParam render server config parameters
+func (c *client) ServerConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error) {
+	return c.configParam(cpc, c.serverDataIDTemplate, cfs...)
 }
 
-// NacosConfigParam Get nacos config from environment variables. All the parameters can be customized with CustomFunction.
+// ClientConfigParam render client config parameters
+func (c *client) ClientConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error) {
+	return c.configParam(cpc, c.clientDataIDTemplate, cfs...)
+}
+
+// configParam render config parameters. All the parameters can be customized with CustomFunction.
 // ConfigParam explain:
-//  1. Type: data format, support JSON and YAML, JSON by default. Could extend it by implementing the ConfigParser interface.
+//  1. Type: data id format, support JSON and YAML, JSON by default. Could extend it by implementing the ConfigParser interface.
 //  2. Content: empty by default. Customize with CustomFunction.
 //  3. Group: DEFAULT_GROUP by default.
-//  4. DataId: {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}} by default. Customize it by CustomFunction or
-//     use specified format. ref: nacos/env.go:46
-func (c *client) NacosConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error) {
+//  4. ServerDataId: {{.ServerServiceName}}.{{.Category}} by default.
+//     ClientDataId: {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}} by default.
+func (c *client) configParam(cpc *ConfigParamConfig, t *template.Template, cfs ...CustomFunction) (vo.ConfigParam, error) {
 	param := vo.ConfigParam{
 		Type:    vo.JSON,
 		Content: defaultContent,
 	}
 	var err error
-	param.DataId, err = c.renderDataID(cpc)
+	param.DataId, err = c.render(cpc, t)
 	if err != nil {
 		return param, err
 	}
-	param.Group, err = c.renderGroup(cpc)
+	param.Group, err = c.render(cpc, c.groupTemplate)
 	if err != nil {
 		return param, err
 	}
-
-	// TODO trim the specified prefix string
-	param.DataId = strings.TrimPrefix(param.DataId, ".")
-	param.Group = strings.TrimPrefix(param.Group, ".")
 
 	for _, cf := range cfs {
 		cf(&param)

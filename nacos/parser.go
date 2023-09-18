@@ -21,6 +21,29 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+const (
+	NacosDefaultServerAddr   = "127.0.0.1"
+	NacosDefaultPort         = 8848
+	NacosDefaultConfigGroup  = "DEFAULT_GROUP"
+	NacosDefaultClientDataID = "{{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}"
+	NacosDefaultServerDataID = "{{.ServerServiceName}}.{{.Category}}"
+)
+
+const (
+	defaultContent = ""
+)
+
+// CustomFunction use for customize the config parameters.
+type CustomFunction func(*vo.ConfigParam)
+
+// ConfigParamConfig use for render the dataId or group info by go template, ref: https://pkg.go.dev/text/template
+// The fixed key shows as below.
+type ConfigParamConfig struct {
+	Category          string
+	ClientServiceName string
+	ServerServiceName string
+}
+
 var _ ConfigParser = &parser{}
 
 // ConfigParser the parser for nacos config.

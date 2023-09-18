@@ -28,7 +28,7 @@ import (
 func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) []client.Option {
-	param, err := nacosClient.NacosConfigParam(&nacos.ConfigParamConfig{
+	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          retryConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,

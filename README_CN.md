@@ -110,24 +110,24 @@ func main() {
 ```
 ### Nacos 配置
 
-根据 Options 的参数初始化 client, 如果参数为空则会根据环境变量获取到 nacos 的 addr, port 以及 namespace 链接到 nacos 服务器上，建立链接之后 suite 会根据 configGroup 以及 configDataId 订阅对应的配置并动态更新自身策略，具体参数参考下面环境变量。 
+根据 Options 的参数初始化 client，建立链接之后 suite 会根据 `Group` 以及 `ServerDataIDFormat` 或者 `ClientDataIDFormat` 订阅对应的配置并动态更新自身策略，具体参数参考下面环境变量。 
 
-配置的格式默认支持 `json` 和 `yaml`，可以使用函数 `SetParser` 进行自定义格式解析方式，并在 `NewSuite` 的时候使用 `CustomFunction` 函数修改订阅函数的格式。
+配置的格式默认支持 `json` 和 `yaml`，可以使用函数 [SetParser](https://github.com/kitex-contrib/config-nacos/blob/eb006978517678dd75a81513142d3faed6a66f8d/nacos/nacos.go#L68) 进行自定义格式解析方式，并在 `NewSuite` 的时候使用 `CustomFunction` 函数修改订阅函数的格式。
 
 #### CustomFunction
 
 允许用户自定义 nacos 的参数. 
 
-#### 环境变量
+#### Options 默认值
 
-
-| 变量名 | 变量默认值 | 作用 |
+| 参数 | 变量默认值 | 作用 |
 | ------------------------- | ---------------------------------- | --------------------------------- |
-| KITEX_CONFIG_NACOS_SERVER_ADDR               | 127.0.0.1                          | nacos 服务器地址 |
-| KITEX_CONFIG_NACOS_SERVER_PORT               | 8848                               | nacos 服务器端口            |
-| KITEX_CONFIG_NACOS_NAMESPACE                 |                                    | nacos 中的 namespace Id |
-| KITEX_CONFIG_NACOS_DATA_ID              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | 使用 go [template](https://pkg.go.dev/text/template) 语法渲染生成对应的 ID, 使用 `ClientServiceName` `ServiceName` `Category` 三个元数据，可以自定义          |
-| KITEX_CONFIG_NACOS_GROUP               | DEFAULT_GROUP                      | 使用固定值，也可以动态渲染，用法同 configDataId          |
+| Address               | 127.0.0.1                          | nacos 服务器地址 |
+| Port               | 8848                               | nacos 服务器端口            |
+| NamespaceID                 |                                    | nacos 中的 namespace Id |
+| ClientDataIDFormat              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | 使用 go [template](https://pkg.go.dev/text/template) 语法渲染生成对应的 ID, 使用 `ClientServiceName` `ServiceName` `Category` 三个元数据          |
+| ServerDataIDFormat              | {{.ServerServiceName}}.{{.Category}}  | 使用 go [template](https://pkg.go.dev/text/template) 语法渲染生成对应的 ID, 使用 `ServiceName` `Category` 两个元数据          |
+| Group               | DEFAULT_GROUP                      | 使用固定值，也可以动态渲染，用法同 DataIDFormat          |
 
 #### 治理策略
 

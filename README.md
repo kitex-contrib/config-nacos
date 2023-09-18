@@ -111,7 +111,7 @@ func main() {
 
 ### Nacos Configuration
 
-The client is initialized according to the parameters of `Options` and connects to the nacos server. If the parameters are empty, the addr, port and namespace of nacos are obtained from the environment variables. After the connection is established, the suite subscribes the appropriate configuration based on `configGroup` and `configDataId` to updates its own policy dynamically. See the environment variables below for specific parameters.
+The client is initialized according to the parameters of `Options` and connects to the nacos server. After the connection is established, the suite subscribes the appropriate configuration based on `Group`, `ServerDataIDFormat` and `ClientDataIDFormat` to updates its own policy dynamically. See the environment variables below for specific parameters.
 
 The configuration format supports `json` and `yaml`. You can use the [SetParser](https://github.com/kitex-contrib/config-nacos/blob/eb006978517678dd75a81513142d3faed6a66f8d/nacos/nacos.go#L68) function to customise the format parsing method, and the `CustomFunction` function to customise the format of the subscription function during `NewSuite`.
 ####
@@ -120,15 +120,16 @@ The configuration format supports `json` and `yaml`. You can use the [SetParser]
 
 Provide the mechanism to custom the nacos parameter `vo.ConfigParam`. 
 
-#### Environment Variable
+#### Options Variable
 
-| Environment Variable Name | Environment Variable Default Value | Environment Variable Introduction |
+| Variable Name | Default Value | Introduction |
 | ------------------------- | ---------------------------------- | --------------------------------- |
-| KITEX_CONFIG_NACOS_SERVER_ADDR                | 127.0.0.1                          | Nacos server address              |
-| KITEX_CONFIG_NACOS_SERVER_PORT                | 8848                               | Nacos server port                 |
-| KITEX_CONFIG_NACOS_NAMESPACE                 |                                    | The namespaceId of nacos          |
-| KITEX_CONFIG_NACOS_DATA_ID              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | Use go [template](https://pkg.go.dev/text/template) syntax rendering to generate the appropriate ID, and use `ClientServiceName` `ServiceName` `Category` three metadata that can be customised          |
-| KITEX_CONFIG_NACOS_GROUP               | DEFAULT_GROUP                      | Use fixed values or dynamic rendering. Usage is the same as configDataId.          |
+| Address               | 127.0.0.1                          | Nacos server address |
+| Port               | 8848                               | Nacos server port            |
+| NamespaceID                 |                                    | The namespaceID of Nacos 中的 namespace Id |
+| ClientDataIDFormat              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | Use go [template](https://pkg.go.dev/text/template) syntax rendering to generate the appropriate ID, and use `ClientServiceName` `ServiceName` `Category` three metadata that can be customised          |
+| ServerDataIDFormat              | {{.ServerServiceName}}.{{.Category}}  | Use go [template](https://pkg.go.dev/text/template) syntax rendering to generate the appropriate ID, and use `ServiceName` `Category` two metadatas that can be customised          |
+| Group               | DEFAULT_GROUP                      | Use fixed values or dynamic rendering. Usage is the same as configDataId.          |
 
 #### Governance Policy
 > The configDataId and configGroup in the following example use default values, the service name is `ServiceName` and the client name is `ClientName`.
