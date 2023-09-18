@@ -116,6 +116,10 @@ The client is initialized according to the parameters of `Options` and connects 
 The configuration format supports `json` and `yaml`. You can use the [SetParser](https://github.com/kitex-contrib/config-nacos/blob/eb006978517678dd75a81513142d3faed6a66f8d/nacos/nacos.go#L68) function to customise the format parsing method, and the `CustomFunction` function to customise the format of the subscription function during `NewSuite`.
 ####
 
+#### CustomFunction
+
+Provide the mechanism to custom the nacos parameter `vo.ConfigParam`. 
+
 #### Environment Variable
 
 | Environment Variable Name | Environment Variable Default Value | Environment Variable Introduction |

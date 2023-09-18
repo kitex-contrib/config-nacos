@@ -114,6 +114,10 @@ func main() {
 
 配置的格式默认支持 `json` 和 `yaml`，可以使用函数 `SetParser` 进行自定义格式解析方式，并在 `NewSuite` 的时候使用 `CustomFunction` 函数修改订阅函数的格式。
 
+#### CustomFunction
+
+允许用户自定义 nacos 的参数. 
+
 #### 环境变量
 
 
