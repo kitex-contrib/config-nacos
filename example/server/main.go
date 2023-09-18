@@ -41,21 +41,15 @@ func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Respon
 
 func main() {
 	klog.SetLevel(klog.LevelDebug)
-	nacosClient, err := nacos.DefaultClient()
+	nacosClient, err := nacos.New(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
-	serviceName := "echo"
-
-	opts := []server.Option{
-		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
-	}
-
-	opts = append(opts, nacosserver.NewSuite(serviceName, nacosClient).Options()...)
-
+	serviceName := "ServiceName"
 	svr := echo.NewServer(
 		new(EchoImpl),
-		opts...,
+		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
+		server.WithSuite(nacosserver.NewSuite(serviceName, nacosClient)),
 	)
 	if err := svr.Run(); err != nil {
 		log.Println("server stopped with error:", err)

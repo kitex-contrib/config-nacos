@@ -30,10 +30,13 @@ import (
 func WithLimiter(dest string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) server.Option {
-	param := nacos.NacosConfigParam(&nacos.ConfigParamConfig{
+	param, err := nacosClient.ServerConfigParam(&nacos.ConfigParamConfig{
 		Category:          limiterConfigName,
 		ServerServiceName: dest,
 	}, cfs...)
+	if err != nil {
+		panic(err)
+	}
 
 	return server.WithLimit(initLimitOptions(param, dest, nacosClient))
 }

@@ -27,11 +27,14 @@ import (
 func WithRPCTimeout(dest, src string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) []client.Option {
-	param := nacos.NacosConfigParam(&nacos.ConfigParamConfig{
+	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          rpcTimeoutConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,
 	}, cfs...)
+	if err != nil {
+		panic(err)
+	}
 
 	return []client.Option{
 		client.WithTimeoutProvider(initRPCTimeoutContainer(param, dest, nacosClient)),

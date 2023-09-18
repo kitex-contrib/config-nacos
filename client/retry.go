@@ -28,11 +28,14 @@ import (
 func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) []client.Option {
-	param := nacos.NacosConfigParam(&nacos.ConfigParamConfig{
+	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          retryConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,
 	}, cfs...)
+	if err != nil {
+		panic(err)
+	}
 
 	return []client.Option{
 		client.WithRetryContainer(initRetryContainer(param, dest, nacosClient)),

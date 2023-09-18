@@ -31,11 +31,14 @@ import (
 func WithCircuitBreaker(dest, src string, nacosClient nacos.Client,
 	cfs ...nacos.CustomFunction,
 ) []client.Option {
-	param := nacos.NacosConfigParam(&nacos.ConfigParamConfig{
+	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          circuitBreakerConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,
 	}, cfs...)
+	if err != nil {
+		panic(err)
+	}
 
 	cbSuite := initCircuitBreaker(param, dest, src, nacosClient)
 

@@ -18,6 +18,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
@@ -31,7 +32,7 @@ import (
 func main() {
 	klog.SetLevel(klog.LevelDebug)
 
-	nacosClient, err := nacos.DefaultClient()
+	nacosClient, err := nacos.New(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
@@ -40,18 +41,12 @@ func main() {
 		klog.Infof("nacos config %v", cp)
 	}
 
-	opts := []client.Option{
-		client.WithHostPorts("0.0.0.0:8888"),
-	}
-
-	serviceName := "echo"
-	clientName := "test"
-
-	opts = append(opts, nacosclient.NewSuite(serviceName, clientName, nacosClient, fn).Options()...)
-
+	serviceName := "ServiceName"
+	clientName := "ClientName"
 	client, err := echo.NewClient(
 		serviceName,
-		opts...,
+		client.WithHostPorts("0.0.0.0:8888"),
+		client.WithSuite(nacosclient.NewSuite(serviceName, clientName, nacosClient, fn)),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -64,5 +59,6 @@ func main() {
 		} else {
 			klog.Infof("receive response %v", resp)
 		}
+		time.Sleep(time.Second * 10)
 	}
 }
