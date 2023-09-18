@@ -18,6 +18,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
@@ -40,8 +41,8 @@ func main() {
 		klog.Infof("nacos config %v", cp)
 	}
 
-	serviceName := "echo"
-	clientName := "test"
+	serviceName := "ServiceName"
+	clientName := "ClientName"
 	client, err := echo.NewClient(
 		serviceName,
 		client.WithHostPorts("0.0.0.0:8888"),
@@ -58,5 +59,6 @@ func main() {
 		} else {
 			klog.Infof("receive response %v", resp)
 		}
+		time.Sleep(time.Second * 10)
 	}
 }

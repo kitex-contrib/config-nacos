@@ -43,7 +43,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	serviceName := "server"
+	serviceName := "ServiceName"
 	svr := echo.NewServer(
 		new(EchoImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),
@@ -87,8 +87,8 @@ func main() {
 		klog.Infof("nacos config %v", cp)
 	}
 
-	serviceName := "server"
-	clientName := "client"
+	serviceName := "ServiceName"
+	clientName := "ClientName"
 	client, err := echo.NewClient(
 		serviceName,
 		client.WithHostPorts("0.0.0.0:8888"),
