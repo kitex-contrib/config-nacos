@@ -216,7 +216,7 @@ Note: retry.Container has built-in support for specifying the default configurat
 
 Example：
 ```
-configDataId: ClietnName.ServiceName.rpc_timeout
+configDataId: ClientName.ServiceName.rpc_timeout
 {
   "*": {
     "conn_timeout_ms": 100,
