@@ -2,9 +2,9 @@
 
 [English](https://github.com/kitex-contrib/config-nacos/blob/main/README.md)
 
-使用 **nacos** 作为 **Kitex** 的配置中心
+使用 **nacos** 作为 **Kitex** 的服务治理配置中心
 
-##  这个项目应当如何使用?
+##  用法
 
 ### 基本使用
 
@@ -144,8 +144,10 @@ func main() {
 |qps_limit|每 100ms 内的最大请求数量| 
 
 例子：
-```
-configDataID: ServiceName.limit
+
+> configDataID: ServiceName.limit
+
+```json
 {
   "connection_limit": 100, 
   "qps_limit": 2000        
@@ -167,8 +169,10 @@ configDataID: ServiceName.limit
 |failure_policy.backoff_policy| 可以设置的策略： `fixed` `none` `random` | 
 
 例子：
-```
-configDataId: ClientName.ServiceName.retry
+
+> configDataId: ClientName.ServiceName.retry
+
+```json
 {
     "*": {  
         "enable": true,
@@ -214,8 +218,10 @@ configDataId: ClientName.ServiceName.retry
 [JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/rpctimeout/item_rpc_timeout.go#L42)
 
 例子：
-```
-configDataId: ClientName.ServiceName.rpc_timeout
+
+> configDataId: ClientName.ServiceName.rpc_timeout
+
+```json
 {
   "*": {
     "conn_timeout_ms": 100, 
@@ -236,10 +242,14 @@ configDataId: ClientName.ServiceName.rpc_timeout
 |参数|说明|
 |----|----|
 |min_sample| 最小的统计样本数| 
+
 例子：
-```
+
 echo 方法使用下面的配置（0.3、100），其他方法使用全局默认配置（0.5、200）
-configDataId: `ClientName.ServiceName.circuit_break`
+
+> configDataId: `ClientName.ServiceName.circuit_break`
+
+```json
 {
   "echo": {
     "enable": true,

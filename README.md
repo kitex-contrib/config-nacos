@@ -2,9 +2,9 @@
 
 [中文](https://github.com/kitex-contrib/config-nacos/blob/main/README_CN.md)
 
-Nacos as config centre.
+Nacos as config centre for service governance.
 
-## How to use?
+## Usage
 
 ### Basic
 
@@ -143,10 +143,12 @@ Provide the mechanism to custom the nacos parameter `vo.ConfigParam`.
 |----|----|
 |connection_limit| Maximum concurrent connections | 
 |qps_limit| Maximum request number every 100ms | 
-Example:
-```
-configDataID: ServiceName.limit
 
+Example:
+
+> configDataID: ServiceName.limit
+
+```json
 {
   "connection_limit": 100,
   "qps_limit": 2000
@@ -168,8 +170,10 @@ Note:
 |failure_policy.backoff_policy| Can only be set one of `fixed` `none` `random` | 
 
 Example：
-```
-configDataId: ClientName.ServiceName.retry
+
+> configDataId: ClientName.ServiceName.retry
+
+```json
 {
     "*": {  
         "enable": true,
@@ -215,8 +219,10 @@ Note: retry.Container has built-in support for specifying the default configurat
 [JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/rpctimeout/item_rpc_timeout.go#L42)
 
 Example：
-```
-configDataId: ClientName.ServiceName.rpc_timeout
+
+> configDataId: ClientName.ServiceName.rpc_timeout
+
+```json
 {
   "*": {
     "conn_timeout_ms": 100,
@@ -237,10 +243,14 @@ Note: The circuit breaker implementation of kitex does not currently support cha
 |Variable|Introduction|
 |----|----|
 |min_sample| Minimum statistical sample number| 
+
 Example：
-```
+
 The echo method uses the following configuration (0.3, 100) and other methods use the global default configuration (0.5, 200)
-configDataId: `ClientName.ServiecName.circuit_break`
+
+> configDataId: `ClientName.ServiecName.circuit_break`
+
+```json
 {
   "echo": {
     "enable": true,
