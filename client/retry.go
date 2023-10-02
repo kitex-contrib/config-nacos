@@ -15,13 +15,13 @@
 package client
 
 import (
-	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/config-nacos/utils"
-	"github.com/nacos-group/nacos-sdk-go/vo"
-
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/retry"
+	"github.com/nacos-group/nacos-sdk-go/vo"
+
+	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 )
 
 // WithRetryPolicy sets the retry policy from nacos configuration center.
@@ -37,8 +37,10 @@ func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 		panic(err)
 	}
 
+	rc := initRetryContainer(param, dest, nacosClient)
 	return []client.Option{
-		client.WithRetryContainer(initRetryContainer(param, dest, nacosClient)),
+		client.WithRetryContainer(rc),
+		client.WithCloseCallbacks(rc.Close),
 		client.WithCloseCallbacks(func() error {
 			// cancel the configuration listener when client is closed.
 			return nacosClient.DeregisterConfig(param)
@@ -49,7 +51,7 @@ func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
 func initRetryContainer(param vo.ConfigParam, dest string,
 	nacosClient nacos.Client,
 ) *retry.Container {
-	retryContainer := retry.NewRetryContainer()
+	retryContainer := retry.NewRetryContainerWithPercentageLimit()
 
 	ts := utils.ThreadSafeSet{}
 
