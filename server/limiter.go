@@ -24,18 +24,21 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 )
 
 // WithLimiter sets the limiter config from nacos configuration center.
-func WithLimiter(dest string, nacosClient nacos.Client,
-	cfs ...nacos.CustomFunction,
-) server.Option {
+func WithLimiter(dest string, nacosClient nacos.Client, opts utils.Options) server.Option {
 	param, err := nacosClient.ServerConfigParam(&nacos.ConfigParamConfig{
 		Category:          limiterConfigName,
 		ServerServiceName: dest,
-	}, cfs...)
+	})
 	if err != nil {
 		panic(err)
+	}
+
+	for _, f := range opts.NacosCustomFunctions {
+		f(&param)
 	}
 
 	return server.WithLimit(initLimitOptions(param, dest, nacosClient))

@@ -28,16 +28,18 @@ import (
 )
 
 // WithCircuitBreaker sets the circuit breaker policy from nacos configuration center.
-func WithCircuitBreaker(dest, src string, nacosClient nacos.Client,
-	cfs ...nacos.CustomFunction,
-) []client.Option {
+func WithCircuitBreaker(dest, src string, nacosClient nacos.Client, opts utils.Options) []client.Option {
 	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          circuitBreakerConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,
-	}, cfs...)
+	})
 	if err != nil {
 		panic(err)
+	}
+
+	for _, f := range opts.NacosCustomFunctions {
+		f(&param)
 	}
 
 	cbSuite := initCircuitBreaker(param, dest, src, nacosClient)

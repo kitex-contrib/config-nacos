@@ -41,7 +41,7 @@ func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Respon
 
 func main() {
 	klog.SetLevel(klog.LevelDebug)
-	nacosClient, err := nacos.New(nacos.Options{})
+	nacosClient, err := nacos.NewClient(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}

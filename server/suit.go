@@ -17,6 +17,7 @@ package server
 import (
 	"github.com/cloudwego/kitex/server"
 	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 )
 
 const (
@@ -27,23 +28,24 @@ const (
 type NacosServerSuite struct {
 	nacosClient nacos.Client
 	service     string
-	fns         []nacos.CustomFunction
+	opts        utils.Options
 }
 
 // NewSuite service is the destination service.
-func NewSuite(service string, cli nacos.Client,
-	cfs ...nacos.CustomFunction,
-) *NacosServerSuite {
-	return &NacosServerSuite{
+func NewSuite(service string, cli nacos.Client, opts ...utils.Option) *NacosServerSuite {
+	su := &NacosServerSuite{
 		service:     service,
 		nacosClient: cli,
-		fns:         cfs,
 	}
+	for _, opt := range opts {
+		opt.Apply(&su.opts)
+	}
+	return su
 }
 
 // Options return a list client.Option
 func (s *NacosServerSuite) Options() []server.Option {
 	opts := make([]server.Option, 0, 2)
-	opts = append(opts, WithLimiter(s.service, s.nacosClient, s.fns...))
+	opts = append(opts, WithLimiter(s.service, s.nacosClient, s.opts))
 	return opts
 }

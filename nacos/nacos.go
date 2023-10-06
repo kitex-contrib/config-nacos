@@ -29,8 +29,8 @@ import (
 // Client the wrapper of nacos client.
 type Client interface {
 	SetParser(ConfigParser)
-	ClientConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error)
-	ServerConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error)
+	ClientConfigParam(cpc *ConfigParamConfig) (vo.ConfigParam, error)
+	ServerConfigParam(cpc *ConfigParamConfig) (vo.ConfigParam, error)
 	RegisterConfigCallback(vo.ConfigParam, func(string, ConfigParser))
 	DeregisterConfig(vo.ConfigParam) error
 }
@@ -57,10 +57,8 @@ type Options struct {
 	ConfigParser       ConfigParser
 }
 
-// New Create a default Nacos client
-// It can create a client with default config by env variable.
-// See: env.go
-func New(opts Options) (Client, error) {
+// NewClient Create a default Nacos client
+func NewClient(opts Options) (Client, error) {
 	if opts.Address == "" {
 		opts.Address = NacosDefaultServerAddr
 	}
@@ -138,13 +136,13 @@ func (c *client) render(cpc *ConfigParamConfig, t *template.Template) (string, e
 }
 
 // ServerConfigParam render server config parameters
-func (c *client) ServerConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error) {
-	return c.configParam(cpc, c.serverDataIDTemplate, cfs...)
+func (c *client) ServerConfigParam(cpc *ConfigParamConfig) (vo.ConfigParam, error) {
+	return c.configParam(cpc, c.serverDataIDTemplate)
 }
 
 // ClientConfigParam render client config parameters
-func (c *client) ClientConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction) (vo.ConfigParam, error) {
-	return c.configParam(cpc, c.clientDataIDTemplate, cfs...)
+func (c *client) ClientConfigParam(cpc *ConfigParamConfig) (vo.ConfigParam, error) {
+	return c.configParam(cpc, c.clientDataIDTemplate)
 }
 
 // configParam render config parameters. All the parameters can be customized with CustomFunction.
@@ -154,7 +152,7 @@ func (c *client) ClientConfigParam(cpc *ConfigParamConfig, cfs ...CustomFunction
 //  3. Group: DEFAULT_GROUP by default.
 //  4. ServerDataId: {{.ServerServiceName}}.{{.Category}} by default.
 //     ClientDataId: {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}} by default.
-func (c *client) configParam(cpc *ConfigParamConfig, t *template.Template, cfs ...CustomFunction) (vo.ConfigParam, error) {
+func (c *client) configParam(cpc *ConfigParamConfig, t *template.Template) (vo.ConfigParam, error) {
 	param := vo.ConfigParam{
 		Type:    vo.JSON,
 		Content: defaultContent,
@@ -167,10 +165,6 @@ func (c *client) configParam(cpc *ConfigParamConfig, t *template.Template, cfs .
 	param.Group, err = c.render(cpc, c.groupTemplate)
 	if err != nil {
 		return param, err
-	}
-
-	for _, cf := range cfs {
-		cf(&param)
 	}
 	return param, nil
 }

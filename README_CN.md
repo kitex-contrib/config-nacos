@@ -39,7 +39,7 @@ func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Respon
 
 func main() {
 	klog.SetLevel(klog.LevelDebug)
-	nacosClient, err := nacos.New(nacos.Options{})
+	nacosClient, err := nacos.NewClient(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
@@ -75,24 +75,30 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
+type configLog struct{}
+
+func (cl *configLog) Apply(opt *utils.Options) {
+	fn := func(cp *vo.ConfigParam) {
+		klog.Infof("nacos config %v", cp)
+	}
+	opt.NacosCustomFunctions = append(opt.NacosCustomFunctions, fn)
+}
+
 func main() {
 	klog.SetLevel(klog.LevelDebug)
 
-	nacosClient, err := nacos.New(nacos.Options{})
+	nacosClient, err := nacos.NewClient(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
 
-	fn := func(cp *vo.ConfigParam) {
-		klog.Infof("nacos config %v", cp)
-	}
-
+	cl := &configLog{}
 	serviceName := "ServiceName"
 	clientName := "ClientName"
 	client, err := echo.NewClient(
 		serviceName,
 		client.WithHostPorts("0.0.0.0:8888"),
-		client.WithSuite(nacosclient.NewSuite(serviceName, clientName, nacosClient, fn)),
+		client.WithSuite(nacosclient.NewSuite(serviceName, clientName, nacosClient, cl)),
 	)
 	if err != nil {
 		log.Fatal(err)
