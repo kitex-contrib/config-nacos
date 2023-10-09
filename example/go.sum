@@ -702,8 +702,6 @@ github.com/jung-kurt/gofpdf v1.0.0/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
-github.com/kitex-contrib/config-nacos v0.1.1 h1:v5aaSp9UDDXo3eCzwmJ35hTI6e1Cryjh1AN/JcqVU20=
-github.com/kitex-contrib/config-nacos v0.1.1/go.mod h1:a2gHKTXSAS6sxxM02rk92/bsqEGBY09jSAC18h+jxzM=
 github.com/kitex-contrib/monitor-prometheus v0.1.0/go.mod h1:ZHWQOKRHnN1Bw+PgVYeOXmB9l4+k8dlOJ9wx2xz76NU=
 github.com/kitex-contrib/obs-opentelemetry v0.2.1/go.mod h1:dlxSosfcSPOmUo0UGkJn2oXzFlR5+4caPKXRdnlLOpc=
 github.com/kitex-contrib/obs-opentelemetry/logging/logrus v0.0.0-20230219092456-5e6c84962323/go.mod h1:Eml/0Z+CqgGIPf9JXzLGu+N9NJoy2x5pqypN+hmKArE=
@@ -809,8 +807,9 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
+github.com/stretchr/testify v1.8.4/go.mod h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo=
 github.com/thrift-iterator/go v0.0.0-20190402154806-9b5a67519118/go.mod h1:60PRwE/TCI1UqLvn8v2pwAf6+yzTPLP/Ji5xaesWDqk=
 github.com/tidwall/gjson v1.9.3 h1:hqzS9wAHMO+KVBBkLxYdkEeeFHuqr95GfClRLKlgK0E=
 github.com/tidwall/gjson v1.9.3/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
