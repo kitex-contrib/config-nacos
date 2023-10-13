@@ -116,7 +116,7 @@ func main() {
 ```
 ### Nacos 配置
 
-根据 Options 的参数初始化 client，建立链接之后 suite 会根据 `Group` 以及 `ServerDataIDFormat` 或者 `ClientDataIDFormat` 订阅对应的配置并动态更新自身策略，具体参数参考下面环境变量。 
+根据 Options 的参数初始化 client，建立链接之后 suite 会根据 `Group` 以及 `ServerDataIDFormat` 或者 `ClientDataIDFormat` 订阅对应的配置并动态更新自身策略，具体参数参考下面 `Options` 变量。 
 
 配置的格式默认支持 `json` 和 `yaml`，可以使用函数 [SetParser](https://github.com/kitex-contrib/config-nacos/blob/eb006978517678dd75a81513142d3faed6a66f8d/nacos/nacos.go#L68) 进行自定义格式解析方式，并在 `NewSuite` 的时候使用 `CustomFunction` 函数修改订阅函数的格式。
 
