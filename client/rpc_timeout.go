@@ -20,20 +20,23 @@ import (
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/rpctimeout"
 	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
 // WithRPCTimeout sets the RPC timeout policy from nacos configuration center.
-func WithRPCTimeout(dest, src string, nacosClient nacos.Client,
-	cfs ...nacos.CustomFunction,
-) []client.Option {
+func WithRPCTimeout(dest, src string, nacosClient nacos.Client, opts utils.Options) []client.Option {
 	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          rpcTimeoutConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,
-	}, cfs...)
+	})
 	if err != nil {
 		panic(err)
+	}
+
+	for _, f := range opts.NacosCustomFunctions {
+		f(&param)
 	}
 
 	return []client.Option{

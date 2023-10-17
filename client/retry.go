@@ -25,16 +25,18 @@ import (
 )
 
 // WithRetryPolicy sets the retry policy from nacos configuration center.
-func WithRetryPolicy(dest, src string, nacosClient nacos.Client,
-	cfs ...nacos.CustomFunction,
-) []client.Option {
+func WithRetryPolicy(dest, src string, nacosClient nacos.Client, opts utils.Options) []client.Option {
 	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
 		Category:          retryConfigName,
 		ServerServiceName: dest,
 		ClientServiceName: src,
-	}, cfs...)
+	})
 	if err != nil {
 		panic(err)
+	}
+
+	for _, f := range opts.NacosCustomFunctions {
+		f(&param)
 	}
 
 	rc := initRetryContainer(param, dest, nacosClient)

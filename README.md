@@ -39,7 +39,7 @@ func (s *EchoImpl) Echo(ctx context.Context, req *api.Request) (resp *api.Respon
 
 func main() {
 	klog.SetLevel(klog.LevelDebug)
-	nacosClient, err := nacos.New(nacos.Options{})
+	nacosClient, err := nacos.NewClient(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
@@ -75,24 +75,30 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
+type configLog struct{}
+
+func (cl *configLog) Apply(opt *utils.Options) {
+	fn := func(cp *vo.ConfigParam) {
+		klog.Infof("nacos config %v", cp)
+	}
+	opt.NacosCustomFunctions = append(opt.NacosCustomFunctions, fn)
+}
+
 func main() {
 	klog.SetLevel(klog.LevelDebug)
 
-	nacosClient, err := nacos.New(nacos.Options{})
+	nacosClient, err := nacos.NewClient(nacos.Options{})
 	if err != nil {
 		panic(err)
 	}
 
-	fn := func(cp *vo.ConfigParam) {
-		klog.Infof("nacos config %v", cp)
-	}
-
+    cl := &configLog{}
 	serviceName := "ServiceName"
 	clientName := "ClientName"
 	client, err := echo.NewClient(
 		serviceName,
 		client.WithHostPorts("0.0.0.0:8888"),
-		client.WithSuite(nacosclient.NewSuite(serviceName, clientName, nacosClient, fn)),
+		client.WithSuite(nacosclient.NewSuite(serviceName, clientName, nacosClient, cl)),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -111,7 +117,7 @@ func main() {
 
 ### Nacos Configuration
 
-The client is initialized according to the parameters of `Options` and connects to the nacos server. After the connection is established, the suite subscribes the appropriate configuration based on `Group`, `ServerDataIDFormat` and `ClientDataIDFormat` to updates its own policy dynamically. See the environment variables below for specific parameters.
+The client is initialized according to the parameters of `Options` and connects to the nacos server. After the connection is established, the suite subscribes the appropriate configuration based on `Group`, `ServerDataIDFormat` and `ClientDataIDFormat` to updates its own policy dynamically. See the `Options` variables below for specific parameters.
 
 The configuration format supports `json` and `yaml`. You can use the [SetParser](https://github.com/kitex-contrib/config-nacos/blob/eb006978517678dd75a81513142d3faed6a66f8d/nacos/nacos.go#L68) function to customise the format parsing method, and the `CustomFunction` function to customise the format of the subscription function during `NewSuite`.
 ####

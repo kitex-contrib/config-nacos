@@ -17,6 +17,7 @@ package client
 import (
 	"github.com/cloudwego/kitex/client"
 	"github.com/kitex-contrib/config-nacos/nacos"
+	"github.com/kitex-contrib/config-nacos/utils"
 )
 
 const (
@@ -30,26 +31,27 @@ type NacosClientSuite struct {
 	nacosClient nacos.Client
 	service     string
 	client      string
-	fns         []nacos.CustomFunction
+	opts        utils.Options
 }
 
 // NewSuite service is the destination service name and client is the local identity.
-func NewSuite(service, client string, cli nacos.Client,
-	cfs ...nacos.CustomFunction,
-) *NacosClientSuite {
-	return &NacosClientSuite{
+func NewSuite(service, client string, cli nacos.Client, opts ...utils.Option) *NacosClientSuite {
+	su := &NacosClientSuite{
 		service:     service,
 		client:      client,
 		nacosClient: cli,
-		fns:         cfs,
 	}
+	for _, f := range opts {
+		f.Apply(&su.opts)
+	}
+	return su
 }
 
 // Options return a list client.Option
 func (s *NacosClientSuite) Options() []client.Option {
 	opts := make([]client.Option, 0, 7)
-	opts = append(opts, WithRetryPolicy(s.service, s.client, s.nacosClient, s.fns...)...)
-	opts = append(opts, WithRPCTimeout(s.service, s.client, s.nacosClient, s.fns...)...)
-	opts = append(opts, WithCircuitBreaker(s.service, s.client, s.nacosClient, s.fns...)...)
+	opts = append(opts, WithRetryPolicy(s.service, s.client, s.nacosClient, s.opts)...)
+	opts = append(opts, WithRPCTimeout(s.service, s.client, s.nacosClient, s.opts)...)
+	opts = append(opts, WithCircuitBreaker(s.service, s.client, s.nacosClient, s.opts)...)
 	return opts
 }
