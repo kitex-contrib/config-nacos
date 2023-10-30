@@ -54,6 +54,8 @@ type Options struct {
 	ServerDataIDFormat string
 	ClientDataIDFormat string
 	CustomLogger       logger.Logger
+	Password           string
+	Username           string
 	ConfigParser       ConfigParser
 }
 
@@ -89,6 +91,8 @@ func NewClient(opts Options) (Client, error) {
 		RegionId:            opts.RegionID,
 		NotLoadCacheAtStart: true,
 		CustomLogger:        opts.CustomLogger,
+		Password:            opts.Password,
+		Username:            opts.Username,
 	}
 	nacosClient, err := clients.NewConfigClient(
 		vo.NacosClientParam{
