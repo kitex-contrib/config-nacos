@@ -40,11 +40,14 @@ func WithLimiter(dest string, nacosClient nacos.Client, opts utils.Options) serv
 	for _, f := range opts.NacosCustomFunctions {
 		f(&param)
 	}
-
-	return server.WithLimit(initLimitOptions(param, dest, nacosClient))
+	uniqueID := nacos.GetUniqueID()
+	server.RegisterShutdownHook(func() {
+		nacosClient.DeregisterConfig(param, uniqueID)
+	})
+	return server.WithLimit(initLimitOptions(param, dest, nacosClient, uniqueID))
 }
 
-func initLimitOptions(param vo.ConfigParam, dest string, nacosClient nacos.Client) *limit.Option {
+func initLimitOptions(param vo.ConfigParam, dest string, nacosClient nacos.Client, uniqueID int64) *limit.Option {
 	var updater atomic.Value
 	opt := &limit.Option{}
 	opt.UpdateControl = func(u limit.Updater) {
@@ -71,6 +74,6 @@ func initLimitOptions(param vo.ConfigParam, dest string, nacosClient nacos.Clien
 		}
 	}
 
-	nacosClient.RegisterConfigCallback(param, onChangeCallback)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback, uniqueID)
 	return opt
 }

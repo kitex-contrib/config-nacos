@@ -6,6 +6,7 @@ require (
 	github.com/cloudwego/kitex v0.7.2
 	github.com/cloudwego/kitex-examples v0.2.0
 	github.com/kitex-contrib/config-nacos v0.1.1
+	github.com/nacos-group/nacos-sdk-go v1.1.4
 )
 
 require (
@@ -37,7 +38,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/gls v0.0.0-20220109145502-612d0167dce5 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/nacos-group/nacos-sdk-go v1.1.4 // indirect
 	github.com/oleiade/lane v1.0.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
