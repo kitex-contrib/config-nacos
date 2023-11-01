@@ -251,6 +251,7 @@ func (c *client) listenConfig(param vo.ConfigParam, uniqueID int64) {
 			Type:     param.Type,
 			OnChange: c.onChange,
 		})
+		// Performs only local connection and fails only when the input params are invalid
 		if err != nil {
 			panic(err)
 		}
@@ -267,10 +268,12 @@ func (c *client) RegisterConfigCallback(param vo.ConfigParam,
 		callback(data, c.parser)
 	}
 
+	// NOTE: does not ensure that GetConfig succeeds, the govern policy may not be correct if it fails here.
 	data, err := c.ncli.GetConfig(param)
-	// the nacos client has handled the not exist error.
 	if err != nil {
-		panic(err)
+		// If the initial connection fails and the reconnection is successful, the callback handler can also be invoked.
+		// Ignore the error here and print the error info.
+		klog.Errorf("get config %v from nacos failed %v", param, err)
 	}
 
 	callback(data, c.parser)
