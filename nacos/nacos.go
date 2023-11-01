@@ -273,7 +273,7 @@ func (c *client) RegisterConfigCallback(param vo.ConfigParam,
 	if err != nil {
 		// If the initial connection fails and the reconnection is successful, the callback handler can also be invoked.
 		// Ignore the error here and print the error info.
-		klog.Errorf("get config %v from nacos failed %v", param, err)
+		klog.Warnf("get config %v from nacos failed %v", param, err)
 	}
 
 	callback(data, c.parser)
