@@ -42,7 +42,9 @@ func WithCircuitBreaker(dest, src string, nacosClient nacos.Client, opts utils.O
 		f(&param)
 	}
 
-	cbSuite := initCircuitBreaker(param, dest, src, nacosClient)
+	uniqueID := nacos.GetUniqueID()
+
+	cbSuite := initCircuitBreaker(param, dest, src, nacosClient, uniqueID)
 
 	return []client.Option{
 		client.WithCircuitBreaker(cbSuite),
@@ -52,7 +54,7 @@ func WithCircuitBreaker(dest, src string, nacosClient nacos.Client, opts utils.O
 				return err
 			}
 			// cancel the configuration listener when client is closed.
-			return nacosClient.DeregisterConfig(param)
+			return nacosClient.DeregisterConfig(param, uniqueID)
 		}),
 	}
 }
@@ -77,7 +79,7 @@ func genServiceCBKey(toService, method string) string {
 }
 
 func initCircuitBreaker(param vo.ConfigParam, dest, src string,
-	nacosClient nacos.Client,
+	nacosClient nacos.Client, uniqueID int64,
 ) *circuitbreak.CBSuite {
 	cb := circuitbreak.NewCBSuite(genServiceCBKeyWithRPCInfo)
 	lcb := utils.ThreadSafeSet{}
@@ -104,7 +106,7 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 		}
 	}
 
-	nacosClient.RegisterConfigCallback(param, onChangeCallback)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback, uniqueID)
 
 	return cb
 }

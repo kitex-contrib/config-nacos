@@ -39,19 +39,21 @@ func WithRetryPolicy(dest, src string, nacosClient nacos.Client, opts utils.Opti
 		f(&param)
 	}
 
-	rc := initRetryContainer(param, dest, nacosClient)
+	uniqueID := nacos.GetUniqueID()
+
+	rc := initRetryContainer(param, dest, nacosClient, uniqueID)
 	return []client.Option{
 		client.WithRetryContainer(rc),
 		client.WithCloseCallbacks(rc.Close),
 		client.WithCloseCallbacks(func() error {
 			// cancel the configuration listener when client is closed.
-			return nacosClient.DeregisterConfig(param)
+			return nacosClient.DeregisterConfig(param, uniqueID)
 		}),
 	}
 }
 
 func initRetryContainer(param vo.ConfigParam, dest string,
-	nacosClient nacos.Client,
+	nacosClient nacos.Client, uniqueID int64,
 ) *retry.Container {
 	retryContainer := retry.NewRetryContainerWithPercentageLimit()
 
@@ -87,7 +89,7 @@ func initRetryContainer(param vo.ConfigParam, dest string,
 		}
 	}
 
-	nacosClient.RegisterConfigCallback(param, onChangeCallback)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback, uniqueID)
 
 	return retryContainer
 }

@@ -16,6 +16,7 @@ package nacos
 
 import (
 	"bytes"
+	"sync"
 	"text/template"
 
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -26,13 +27,30 @@ import (
 	"github.com/nacos-group/nacos-sdk-go/vo"
 )
 
+// callbackHandler ...
+type callbackHandler func(namespace, group, dataId, data string)
+
+type configParam struct {
+	DataID string
+	Group  string
+}
+
+// NOTE: the nacos client use namespace + dataID + group as cache key, and the namespace
+// in client is fixed.
+func configParamKey(in vo.ConfigParam) configParam {
+	return configParam{
+		DataID: in.DataId,
+		Group:  in.Group,
+	}
+}
+
 // Client the wrapper of nacos client.
 type Client interface {
 	SetParser(ConfigParser)
 	ClientConfigParam(cpc *ConfigParamConfig) (vo.ConfigParam, error)
 	ServerConfigParam(cpc *ConfigParamConfig) (vo.ConfigParam, error)
-	RegisterConfigCallback(vo.ConfigParam, func(string, ConfigParser))
-	DeregisterConfig(vo.ConfigParam) error
+	RegisterConfigCallback(vo.ConfigParam, func(string, ConfigParser), int64)
+	DeregisterConfig(vo.ConfigParam, int64) error
 }
 
 type client struct {
@@ -42,6 +60,9 @@ type client struct {
 	groupTemplate        *template.Template
 	serverDataIDTemplate *template.Template
 	clientDataIDTemplate *template.Template
+
+	handlerMutex sync.RWMutex
+	handlers     map[configParam]map[int64]callbackHandler
 }
 
 // Options nacos config options. All the fields have default value.
@@ -121,6 +142,7 @@ func NewClient(opts Options) (Client, error) {
 		groupTemplate:        groupTemplate,
 		serverDataIDTemplate: serverDataIDTemplate,
 		clientDataIDTemplate: clientDataIDTemplate,
+		handlers:             map[configParam]map[int64]callbackHandler{},
 	}
 	return c, nil
 }
@@ -174,29 +196,87 @@ func (c *client) configParam(cpc *ConfigParamConfig, t *template.Template) (vo.C
 }
 
 // DeregisterConfig deregister the config.
-func (c *client) DeregisterConfig(cfg vo.ConfigParam) error {
-	return c.ncli.CancelListenConfig(cfg)
+func (c *client) DeregisterConfig(cfg vo.ConfigParam, uniqueID int64) error {
+	key := configParamKey(cfg)
+	klog.Debugf("deregister key %v for uniqueID %d", key, uniqueID)
+	c.handlerMutex.Lock()
+	defer c.handlerMutex.Unlock()
+	handlers, ok := c.handlers[key]
+	if ok {
+		delete(handlers, uniqueID)
+	}
+	if len(handlers) == 0 {
+		klog.Debugf("the handlers for key %v is empty, cancel listen config from nacos", key)
+		return c.ncli.CancelListenConfig(cfg)
+	}
+	return nil
+}
+
+func (c *client) onChange(namespace, group, dataId, data string) {
+	handlers := make([]callbackHandler, 0, 5)
+	c.handlerMutex.RLock()
+	key := configParam{
+		DataID: dataId,
+		Group:  group,
+	}
+	for _, handler := range c.handlers[key] {
+		handlers = append(handlers, handler)
+	}
+	c.handlerMutex.RUnlock()
+
+	for _, handler := range handlers {
+		handler(namespace, group, dataId, data)
+	}
+}
+
+func (c *client) listenConfig(param vo.ConfigParam, uniqueID int64) {
+	key := configParamKey(param)
+	klog.Debugf("register key %v for uniqueID %d", key, uniqueID)
+	c.handlerMutex.Lock()
+	handlers, ok := c.handlers[key]
+	if !ok {
+		handlers = map[int64]callbackHandler{}
+		c.handlers[key] = handlers
+	}
+	handlers[uniqueID] = param.OnChange
+	c.handlerMutex.Unlock()
+
+	if !ok {
+		klog.Debugf("the first time %v register, listen config from nacos", key)
+		err := c.ncli.ListenConfig(vo.ConfigParam{
+			DataId:   param.DataId,
+			Group:    param.Group,
+			Content:  param.Content,
+			DatumId:  param.DatumId,
+			Type:     param.Type,
+			OnChange: c.onChange,
+		})
+		// Performs only local connection and fails only when the input params are invalid
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 // RegisterConfigCallback register the callback function to nacos client.
 func (c *client) RegisterConfigCallback(param vo.ConfigParam,
-	callback func(string, ConfigParser),
+	callback func(string, ConfigParser), uniqueID int64,
 ) {
 	param.OnChange = func(namespace, group, dataId, data string) {
-		klog.Debugf("[nacos] config %s updated, namespace %s group %s dataId %s data %s",
-			param.DataId, namespace, group, dataId, data)
+		klog.Debugf("[nacos] uniqueID %d config %s updated, namespace %s group %s dataId %s data %s",
+			uniqueID, param.DataId, namespace, group, dataId, data)
 		callback(data, c.parser)
 	}
+
+	// NOTE: does not ensure that GetConfig succeeds, the govern policy may not be correct if it fails here.
 	data, err := c.ncli.GetConfig(param)
-	// the nacos client has handled the not exist error.
 	if err != nil {
-		panic(err)
+		// If the initial connection fails and the reconnection is successful, the callback handler can also be invoked.
+		// Ignore the error here and print the error info.
+		klog.Warnf("get config %v from nacos failed %v", param, err)
 	}
 
 	callback(data, c.parser)
 
-	err = c.ncli.ListenConfig(param)
-	if err != nil {
-		panic(err)
-	}
+	c.listenConfig(param, uniqueID)
 }

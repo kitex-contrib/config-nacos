@@ -39,17 +39,19 @@ func WithRPCTimeout(dest, src string, nacosClient nacos.Client, opts utils.Optio
 		f(&param)
 	}
 
+	uniqueID := nacos.GetUniqueID()
+
 	return []client.Option{
-		client.WithTimeoutProvider(initRPCTimeoutContainer(param, dest, nacosClient)),
+		client.WithTimeoutProvider(initRPCTimeoutContainer(param, dest, nacosClient, uniqueID)),
 		client.WithCloseCallbacks(func() error {
 			// cancel the configuration listener when client is closed.
-			return nacosClient.DeregisterConfig(param)
+			return nacosClient.DeregisterConfig(param, uniqueID)
 		}),
 	}
 }
 
 func initRPCTimeoutContainer(param vo.ConfigParam, dest string,
-	nacosClient nacos.Client,
+	nacosClient nacos.Client, uniqueID int64,
 ) rpcinfo.TimeoutProvider {
 	rpcTimeoutContainer := rpctimeout.NewContainer()
 
@@ -63,7 +65,7 @@ func initRPCTimeoutContainer(param vo.ConfigParam, dest string,
 		rpcTimeoutContainer.NotifyPolicyChange(configs)
 	}
 
-	nacosClient.RegisterConfigCallback(param, onChangeCallback)
+	nacosClient.RegisterConfigCallback(param, onChangeCallback, uniqueID)
 
 	return rpcTimeoutContainer
 }
