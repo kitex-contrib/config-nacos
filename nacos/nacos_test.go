@@ -32,6 +32,7 @@ type fakeNacos struct {
 func (fn *fakeNacos) GetConfig(param vo.ConfigParam) (string, error) {
 	return "", nil
 }
+
 func (fn *fakeNacos) PublishConfig(param vo.ConfigParam) (bool, error) {
 	return false, nil
 }
