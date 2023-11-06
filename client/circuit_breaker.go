@@ -89,7 +89,7 @@ func initCircuitBreaker(param vo.ConfigParam, dest, src string,
 		configs := map[string]circuitbreak.CBConfig{}
 		err := parser.Decode(param.Type, data, &configs)
 		if err != nil {
-			klog.Warnf("[nacos] %s client nacos rpc timeout: unmarshal data %s failed: %s, skip...", dest, data, err)
+			klog.Warnf("[nacos] %s client nacos rpc circuit breaker: unmarshal data %s failed: %s, skip...", dest, data, err)
 			return
 		}
 
