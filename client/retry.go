@@ -44,10 +44,13 @@ func WithRetryPolicy(dest, src string, nacosClient nacos.Client, opts utils.Opti
 	rc := initRetryContainer(param, dest, nacosClient, uniqueID)
 	return []client.Option{
 		client.WithRetryContainer(rc),
-		client.WithCloseCallbacks(rc.Close),
 		client.WithCloseCallbacks(func() error {
 			// cancel the configuration listener when client is closed.
-			return nacosClient.DeregisterConfig(param, uniqueID)
+			err := nacosClient.DeregisterConfig(param, uniqueID)
+			if err != nil {
+				return err
+			}
+			return rc.Close()
 		}),
 	}
 }

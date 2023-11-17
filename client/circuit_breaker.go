@@ -49,12 +49,12 @@ func WithCircuitBreaker(dest, src string, nacosClient nacos.Client, opts utils.O
 	return []client.Option{
 		client.WithCircuitBreaker(cbSuite),
 		client.WithCloseCallbacks(func() error {
-			err := cbSuite.Close()
+			err := nacosClient.DeregisterConfig(param, uniqueID)
 			if err != nil {
 				return err
 			}
 			// cancel the configuration listener when client is closed.
-			return nacosClient.DeregisterConfig(param, uniqueID)
+			return cbSuite.Close()
 		}),
 	}
 }
