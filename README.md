@@ -269,6 +269,9 @@ The echo method uses the following configuration (0.3, 100) and other methods us
 
 Refer to [example](https://github.com/kitex-contrib/config-nacos/tree/main/example) for more usage.
 
+### Note
+Do not delete the config in nacos, otherwise the nacos sdk may produce a large warning log.
+
 
 ## Compatibility
 This Package use Nacos1.x client. The Nacos2.0 and Nacos1.0 Server are fully compatible with it. [see](https://nacos.io/en-us/docs/v2/upgrading/2.0.0-compatibility.html)
