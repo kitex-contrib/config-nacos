@@ -40,8 +40,6 @@ func (cl *configLog) Apply(opt *utils.Options) {
 }
 
 func main() {
-	klog.SetLevel(klog.LevelDebug)
-
 	nacosClient, err := nacos.NewClient(nacos.Options{})
 	if err != nil {
 		panic(err)
@@ -49,8 +47,8 @@ func main() {
 
 	cl := &configLog{}
 
-	serviceName := "ServiceName"
-	clientName := "ClientName"
+	serviceName := "ServiceName" // your server-side service name
+	clientName := "ClientName"   // your client-side service name
 	client, err := echo.NewClient(
 		serviceName,
 		client.WithHostPorts("0.0.0.0:8888"),
