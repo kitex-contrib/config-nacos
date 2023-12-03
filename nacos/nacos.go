@@ -60,19 +60,22 @@ type Options struct {
 // NewClient Create a default Nacos client
 func NewClient(opts Options) (Client, error) {
 	if opts.Address == "" {
-		opts.Address = NacosDefaultServerAddr
+		opts.Address = NacosAddr()
 	}
 	if opts.Port == 0 {
-		opts.Port = NacosDefaultPort
+		opts.Port = NacosPort()
+	}
+	if opts.NamespaceID == "" {
+		opts.NamespaceID = NacosNameSpaceId()
+	}
+	if opts.Group == "" {
+		opts.Group = NacosDefaultConfigGroup
 	}
 	if opts.CustomLogger == nil {
 		opts.CustomLogger = NewCustomNacosLogger()
 	}
 	if opts.ConfigParser == nil {
 		opts.ConfigParser = defaultConfigParse()
-	}
-	if opts.Group == "" {
-		opts.Group = NacosDefaultConfigGroup
 	}
 	if opts.ServerDataIDFormat == "" {
 		opts.ServerDataIDFormat = NacosDefaultServerDataID

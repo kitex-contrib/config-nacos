@@ -130,9 +130,9 @@ Provide the mechanism to custom the nacos parameter `vo.ConfigParam`.
 
 | Variable Name | Default Value | Introduction |
 | ------------------------- | ---------------------------------- | --------------------------------- |
-| Address               | 127.0.0.1                          | Nacos server address |
-| Port               | 8848                               | Nacos server port            |
-| NamespaceID                 |                                    | The namespaceID of Nacos 中的 namespace Id |
+| Address               | 127.0.0.1                          | Nacos server address, may use the environment of `serverAddr` |
+| Port               | 8848                               | Nacos server port, may use the environment of `serverPort` |
+| NamespaceID                 |                                    | The namespaceID of Nacos, may use the environment of `namespace` |
 | ClientDataIDFormat              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | Use go [template](https://pkg.go.dev/text/template) syntax rendering to generate the appropriate ID, and use `ClientServiceName` `ServiceName` `Category` three metadata that can be customised          |
 | ServerDataIDFormat              | {{.ServerServiceName}}.{{.Category}}  | Use go [template](https://pkg.go.dev/text/template) syntax rendering to generate the appropriate ID, and use `ServiceName` `Category` two metadatas that can be customised          |
 | Group               | DEFAULT_GROUP                      | Use fixed values or dynamic rendering. Usage is the same as configDataId.          |
