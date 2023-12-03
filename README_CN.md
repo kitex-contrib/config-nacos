@@ -125,9 +125,9 @@ func main() {
 
 | 参数 | 变量默认值 | 作用 |
 | ------------------------- | ---------------------------------- | --------------------------------- |
-| Address               | 127.0.0.1                          | nacos 服务器地址 |
-| Port               | 8848                               | nacos 服务器端口            |
-| NamespaceID                 |                                    | nacos 中的 namespace Id |
+| Address               | 127.0.0.1                          | nacos 服务器地址, 如果参数为空使用 serverAddr 环境变量值 |
+| Port               | 8848                               | nacos 服务器端口, 如果参数为空使用 serverPort 环境变量值 |
+| NamespaceID                 |                                    | nacos 中的 namespace Id, 如果参数为空使用 namespace 环境变量值 |
 | ClientDataIDFormat              | {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}  | 使用 go [template](https://pkg.go.dev/text/template) 语法渲染生成对应的 ID, 使用 `ClientServiceName` `ServiceName` `Category` 三个元数据          |
 | ServerDataIDFormat              | {{.ServerServiceName}}.{{.Category}}  | 使用 go [template](https://pkg.go.dev/text/template) 语法渲染生成对应的 ID, 使用 `ServiceName` `Category` 两个元数据          |
 | Group               | DEFAULT_GROUP                      | 使用固定值，也可以动态渲染，用法同 DataIDFormat          |
