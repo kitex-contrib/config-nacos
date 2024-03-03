@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -24,10 +25,10 @@ import (
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
-	nacosclient "github.com/kitex-contrib/config-nacos/client"
-	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/config-nacos/utils"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	nacosclient "github.com/kitex-contrib/config-nacos/v2/client"
+	"github.com/kitex-contrib/config-nacos/v2/nacos"
+	"github.com/kitex-contrib/config-nacos/v2/utils"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
 type configLog struct{}
@@ -44,6 +45,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println(nacosClient)
 
 	cl := &configLog{}
 
@@ -57,6 +59,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	for {
 		req := &api.Request{Message: "my request"}
 		resp, err := client.Echo(context.Background(), req)

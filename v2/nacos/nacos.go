@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package nacos
 
 import (
@@ -20,11 +19,10 @@ import (
 	"text/template"
 
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/nacos-group/nacos-sdk-go/clients"
-	"github.com/nacos-group/nacos-sdk-go/clients/config_client"
-	"github.com/nacos-group/nacos-sdk-go/common/constant"
-	"github.com/nacos-group/nacos-sdk-go/common/logger"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients"
+	"github.com/nacos-group/nacos-sdk-go/v2/clients/config_client"
+	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
 // callbackHandler ...
@@ -74,10 +72,10 @@ type Options struct {
 	Group              string
 	ServerDataIDFormat string
 	ClientDataIDFormat string
-	CustomLogger       logger.Logger
 	Password           string
 	Username           string
 	ConfigParser       ConfigParser
+	GrpcPort           uint64
 }
 
 // NewClient Create a default Nacos client
@@ -94,9 +92,6 @@ func NewClient(opts Options) (Client, error) {
 	if opts.Group == "" {
 		opts.Group = NacosDefaultConfigGroup
 	}
-	if opts.CustomLogger == nil {
-		opts.CustomLogger = NewCustomNacosLogger()
-	}
 	if opts.ConfigParser == nil {
 		opts.ConfigParser = defaultConfigParse()
 	}
@@ -106,17 +101,23 @@ func NewClient(opts Options) (Client, error) {
 	if opts.ClientDataIDFormat == "" {
 		opts.ClientDataIDFormat = NacosDefaultClientDataID
 	}
+	if opts.GrpcPort == 0 {
+		opts.GrpcPort = NacosDefaultGrpcPorc
+	}
 
 	sc := []constant.ServerConfig{
 		*constant.NewServerConfig(opts.Address, opts.Port),
 	}
+
 	cc := constant.ClientConfig{
 		NamespaceId:         opts.NamespaceID,
 		RegionId:            opts.RegionID,
 		NotLoadCacheAtStart: true,
-		CustomLogger:        opts.CustomLogger,
 		Password:            opts.Password,
 		Username:            opts.Username,
+		LogDir:              "/tmp/nacos/log",
+		CacheDir:            "/tmp/nacos/cache",
+		LogLevel:            "info",
 	}
 	nacosClient, err := clients.NewConfigClient(
 		vo.NacosClientParam{
@@ -183,7 +184,7 @@ func (c *client) ClientConfigParam(cpc *ConfigParamConfig) (vo.ConfigParam, erro
 //     ClientDataId: {{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}} by default.
 func (c *client) configParam(cpc *ConfigParamConfig, t *template.Template) (vo.ConfigParam, error) {
 	param := vo.ConfigParam{
-		Type:    vo.JSON,
+		Type:    "json",
 		Content: defaultContent,
 	}
 	var err error
@@ -250,7 +251,6 @@ func (c *client) listenConfig(param vo.ConfigParam, uniqueID int64) {
 			DataId:   param.DataId,
 			Group:    param.Group,
 			Content:  param.Content,
-			DatumId:  param.DatumId,
 			Type:     param.Type,
 			OnChange: c.onChange,
 		})

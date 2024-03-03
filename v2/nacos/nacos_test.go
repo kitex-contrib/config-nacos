@@ -11,7 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 package nacos
 
 import (
@@ -19,14 +18,17 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/nacos-group/nacos-sdk-go/model"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/model"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"github.com/stretchr/testify/assert"
 )
 
 type fakeNacos struct {
 	sync.RWMutex
 	handlers map[configParam]callbackHandler
+}
+
+func (fn *fakeNacos) CloseClient() {
 }
 
 func (fn *fakeNacos) GetConfig(param vo.ConfigParam) (string, error) {

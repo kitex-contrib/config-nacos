@@ -19,9 +19,9 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/pkg/rpctimeout"
-	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/config-nacos/utils"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/kitex-contrib/config-nacos/v2/nacos"
+	"github.com/kitex-contrib/config-nacos/v2/utils"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 )
 
 // WithRPCTimeout sets the RPC timeout policy from nacos configuration center.

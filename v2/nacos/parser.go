@@ -17,13 +17,14 @@ package nacos
 import (
 	"fmt"
 
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"sigs.k8s.io/yaml"
 )
 
 const (
 	NacosDefaultServerAddr   = "127.0.0.1"
 	NacosDefaultPort         = 8848
+	NacosDefaultGrpcPorc     = 9848
 	NacosDefaultConfigGroup  = "DEFAULT_GROUP"
 	NacosDefaultClientDataID = "{{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}"
 	NacosDefaultServerDataID = "{{.ServerServiceName}}.{{.Category}}"
@@ -48,15 +49,15 @@ var _ ConfigParser = &parser{}
 
 // ConfigParser the parser for nacos config.
 type ConfigParser interface {
-	Decode(kind vo.ConfigType, data string, config interface{}) error
+	Decode(kind, data string, config interface{}) error
 }
 
 type parser struct{}
 
 // Decode decodes the data to struct in specified format.
-func (p *parser) Decode(kind vo.ConfigType, data string, config interface{}) error {
+func (p *parser) Decode(kind, data string, config interface{}) error {
 	switch kind {
-	case vo.YAML, vo.JSON:
+	case "yaml", "json":
 		// since YAML is a superset of JSON, it can parse JSON using a YAML parser
 		return yaml.Unmarshal([]byte(data), config)
 	default:

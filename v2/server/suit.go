@@ -16,8 +16,8 @@ package server
 
 import (
 	"github.com/cloudwego/kitex/server"
-	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/config-nacos/utils"
+	"github.com/kitex-contrib/config-nacos/v2/nacos"
+	"github.com/kitex-contrib/config-nacos/v2/utils"
 )
 
 const (

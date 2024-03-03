@@ -17,14 +17,14 @@ package client
 import (
 	"strings"
 
+	"github.com/kitex-contrib/config-nacos/v2/nacos"
+	"github.com/kitex-contrib/config-nacos/v2/utils"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
+
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/circuitbreak"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
-	"github.com/nacos-group/nacos-sdk-go/vo"
-
-	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/config-nacos/utils"
 )
 
 // WithCircuitBreaker sets the circuit breaker policy from nacos configuration center.

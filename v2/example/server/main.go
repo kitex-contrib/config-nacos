@@ -24,8 +24,8 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/rpcinfo"
 	"github.com/cloudwego/kitex/server"
-	"github.com/kitex-contrib/config-nacos/nacos"
-	nacosserver "github.com/kitex-contrib/config-nacos/server"
+	"github.com/kitex-contrib/config-nacos/v2/nacos"
+	nacosserver "github.com/kitex-contrib/config-nacos/v2/server"
 )
 
 var _ api.Echo = &EchoImpl{}
@@ -44,7 +44,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	serviceName := "ServiceName" // your server-side service name
+	serviceName := "Hello" // your server-side service name
 	svr := echo.NewServer(
 		new(EchoImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{ServiceName: serviceName}),

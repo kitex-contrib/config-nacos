@@ -17,14 +17,14 @@ package server
 import (
 	"sync/atomic"
 
+	"github.com/kitex-contrib/config-nacos/v2/nacos"
+	"github.com/kitex-contrib/config-nacos/v2/utils"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"
 	"github.com/cloudwego/kitex/pkg/limiter"
 	"github.com/cloudwego/kitex/server"
-	"github.com/nacos-group/nacos-sdk-go/vo"
-
-	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/config-nacos/utils"
 )
 
 // WithLimiter sets the limiter config from nacos configuration center.
