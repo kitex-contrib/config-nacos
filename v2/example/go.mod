@@ -1,6 +1,8 @@
 module example
 
-go 1.19
+go 1.21
+
+toolchain go1.21.1
 
 require (
 	github.com/cloudwego/kitex v0.8.0
