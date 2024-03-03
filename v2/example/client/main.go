@@ -18,6 +18,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/cloudwego/kitex-examples/kitex_gen/api"
 	"github.com/cloudwego/kitex-examples/kitex_gen/api/echo"
 	"github.com/cloudwego/kitex/client"
@@ -26,8 +29,6 @@ import (
 	"github.com/kitex-contrib/config-nacos/v2/nacos"
 	"github.com/kitex-contrib/config-nacos/v2/utils"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
-	"log"
-	"time"
 )
 
 type configLog struct{}

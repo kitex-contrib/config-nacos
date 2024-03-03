@@ -15,11 +15,12 @@ package nacos
 
 import (
 	"fmt"
+	"sync"
+	"testing"
+
 	"github.com/nacos-group/nacos-sdk-go/v2/model"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"github.com/stretchr/testify/assert"
-	"sync"
-	"testing"
 )
 
 type fakeNacos struct {

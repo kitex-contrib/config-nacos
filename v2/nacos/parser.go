@@ -16,6 +16,7 @@ package nacos
 
 import (
 	"fmt"
+
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 	"sigs.k8s.io/yaml"
 )
@@ -48,13 +49,13 @@ var _ ConfigParser = &parser{}
 
 // ConfigParser the parser for nacos config.
 type ConfigParser interface {
-	Decode(kind string, data string, config interface{}) error
+	Decode(kind, data string, config interface{}) error
 }
 
 type parser struct{}
 
 // Decode decodes the data to struct in specified format.
-func (p *parser) Decode(kind string, data string, config interface{}) error {
+func (p *parser) Decode(kind, data string, config interface{}) error {
 	switch kind {
 	case "yaml", "json":
 		// since YAML is a superset of JSON, it can parse JSON using a YAML parser

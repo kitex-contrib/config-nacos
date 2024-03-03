@@ -15,13 +15,14 @@ package nacos
 
 import (
 	"bytes"
+	"sync"
+	"text/template"
+
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/nacos-group/nacos-sdk-go/v2/clients"
 	"github.com/nacos-group/nacos-sdk-go/v2/clients/config_client"
 	"github.com/nacos-group/nacos-sdk-go/v2/common/constant"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
-	"sync"
-	"text/template"
 )
 
 // callbackHandler ...

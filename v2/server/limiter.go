@@ -15,10 +15,11 @@
 package server
 
 import (
+	"sync/atomic"
+
 	"github.com/kitex-contrib/config-nacos/v2/nacos"
 	"github.com/kitex-contrib/config-nacos/v2/utils"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
-	"sync/atomic"
 
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/cloudwego/kitex/pkg/limit"

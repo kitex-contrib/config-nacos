@@ -15,10 +15,11 @@
 package client
 
 import (
+	"strings"
+
 	"github.com/kitex-contrib/config-nacos/v2/nacos"
 	"github.com/kitex-contrib/config-nacos/v2/utils"
 	"github.com/nacos-group/nacos-sdk-go/v2/vo"
-	"strings"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/circuitbreak"
