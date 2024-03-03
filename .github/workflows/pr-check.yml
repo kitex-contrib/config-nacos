@@ -44,30 +44,17 @@ jobs:
           # Set staticcheck flags
           staticcheck_flags: -checks=inherit,-SA1029
 
-  resolve-modules:
-    name: resolve module
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - id: set-matrix
-        run: ./hack/resolve-modules.sh
-
   lint:
-    name: lint module
-    runs-on: ubuntu-latest
-    needs: resolve-modules
-    strategy:
-      matrix: ${{ fromJson(needs.resolve-modules.outputs.matrix) }}
+    runs-on: [ self-hosted, X64 ]
     steps:
       - uses: actions/checkout@v3
-      - name: Lint
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+
+      - name: Golangci Lint
+        # https://golangci-lint.run/
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          working-directory: ${{ matrix.workdir }}
-          args: -E gofumpt --timeout 10m
-          skip-pkg-cache: true

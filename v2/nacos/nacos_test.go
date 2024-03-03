@@ -29,7 +29,6 @@ type fakeNacos struct {
 }
 
 func (fn *fakeNacos) CloseClient() {
-	return
 }
 
 func (fn *fakeNacos) GetConfig(param vo.ConfigParam) (string, error) {
