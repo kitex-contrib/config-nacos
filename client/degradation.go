@@ -17,6 +17,7 @@ package client
 import (
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/kitex-contrib/config-nacos/pkg/degradation"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/kitex-contrib/config-nacos/nacos"
@@ -43,7 +44,7 @@ func WithDegradation(dest, src string, nacosClient nacos.Client, opts utils.Opti
 	dgContainer := initDegradation(param, dest, src, nacosClient, uniqueID)
 
 	return []client.Option{
-		client.WithACLRules(dgContainer.GetACLRule),
+		client.WithACLRules(dgContainer.GetACLRule()),
 		client.WithCloseCallbacks(func() error {
 			err := nacosClient.DeregisterConfig(param, uniqueID)
 			if err != nil {
@@ -61,8 +62,8 @@ func initDegradation(param vo.ConfigParam, dest, src string,
 	dgContainer := degradation.NewDeGradationContainer()
 
 	onChangeCallback := func(data string, parser nacos.ConfigParser) {
-		config := degradation.Config{}
-		err := parser.Decode(param.Type, data, &config)
+		config := &degradation.Config{}
+		err := parser.Decode(param.Type, data, config)
 		if err != nil {
 			klog.Warnf("[nacos] %s client nacos rpc degradation: unmarshal data %s failed: %s, skip...", dest, data, err)
 			return
