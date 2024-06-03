@@ -2,6 +2,7 @@ module github.com/kitex-contrib/config-nacos/v2
 
 go 1.19
 
+
 require (
 	github.com/cloudwego/kitex v0.8.0
 	github.com/cloudwego/kitex-examples v0.2.4
