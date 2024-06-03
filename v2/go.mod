@@ -1,8 +1,6 @@
 module github.com/kitex-contrib/config-nacos/v2
 
-go 1.21
-
-toolchain go1.21.1
+go 1.19
 
 require (
 	github.com/cloudwego/kitex v0.8.0
