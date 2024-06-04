@@ -17,7 +17,7 @@ package client
 import (
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/kitex-contrib/config-nacos/pkg/degradation"
+	"github.com/kitex-contrib/config-nacos/v2/pkg/degradation"
 	"github.com/nacos-group/nacos-sdk-go/vo"
 
 	"github.com/kitex-contrib/config-nacos/nacos"

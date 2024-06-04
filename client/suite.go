@@ -24,8 +24,7 @@ const (
 	retryConfigName          = "retry"
 	rpcTimeoutConfigName     = "rpc_timeout"
 	circuitBreakerConfigName = "circuit_break"
-	// 新增降级策略
-	degradationName = "degradation"
+	degradationName          = "degradation"
 )
 
 // NacosClientSuite nacos client config suite, configure retry timeout limit and circuitbreak dynamically from nacos.
@@ -55,7 +54,6 @@ func (s *NacosClientSuite) Options() []client.Option {
 	opts = append(opts, WithRetryPolicy(s.service, s.client, s.nacosClient, s.opts)...)
 	opts = append(opts, WithRPCTimeout(s.service, s.client, s.nacosClient, s.opts)...)
 	opts = append(opts, WithCircuitBreaker(s.service, s.client, s.nacosClient, s.opts)...)
-	// 新增降级策略选项
 	opts = append(opts, WithDegradation(s.service, s.client, s.nacosClient, s.opts)...)
 	return opts
 }
