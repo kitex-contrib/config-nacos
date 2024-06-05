@@ -18,10 +18,10 @@ import (
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/kitex-contrib/config-nacos/v2/pkg/degradation"
-	"github.com/nacos-group/nacos-sdk-go/vo"
+	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
-	"github.com/kitex-contrib/config-nacos/nacos"
-	"github.com/kitex-contrib/config-nacos/utils"
+	"github.com/kitex-contrib/config-nacos/v2/nacos"
+	"github.com/kitex-contrib/config-nacos/v2/utils"
 )
 
 // WithDegradation sets the degradation policy from nacos configuration center.
