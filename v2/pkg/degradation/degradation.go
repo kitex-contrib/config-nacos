@@ -42,7 +42,7 @@ var defaultConfig = &Config{Enable: false, Percentage: 0}
 
 // GetDefaultDegradationConfig return defaultConfig of degradation.
 func GetDefaultDegradationConfig() *Config {
-	return defaultConfig
+	return defaultConfig.DeepCopy()
 }
 
 func NewDegradationContainer() *Container {
