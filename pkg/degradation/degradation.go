@@ -16,11 +16,12 @@ package degradation
 
 import (
 	"context"
+	"sync"
+	"sync/atomic"
+
 	"github.com/bytedance/gopkg/lang/fastrand"
 	"github.com/cloudwego/kitex/pkg/acl"
 	"github.com/pkg/errors"
-	"sync"
-	"sync/atomic"
 )
 
 var errorDegradation = errors.New("rejected by client degradation config")
