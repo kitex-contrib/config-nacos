@@ -262,6 +262,27 @@ The echo method uses the following configuration (0.3, 100) and other methods us
   }
 }
 ```
+
+##### Degradation: Category=degradation
+
+[JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/#L30)
+
+| Variable   |Introduction|
+|------------|----|
+| enable     | Whether to enable degradation| 
+| percentage | The percentage of dropped requests| 
+
+Example：
+
+The all requests uses the following configuration (true, 50) 
+> configDataId: `ClientName.ServiecName.degradation`
+
+```json
+{
+  "enable": true,
+  "percentage": 50
+}
+```
 ### More Info
 
 Refer to [example](https://github.com/kitex-contrib/config-nacos/tree/main/example) for more usage.
