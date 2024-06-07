@@ -262,6 +262,26 @@ echo 方法使用下面的配置（0.3、100），其他方法使用全局默认
 }
 ```
 
+##### 降级: Category=degradation
+
+[JSON Schema](https://github.com/cloudwego/kitex/blob/develop/pkg/#L30)
+
+| 参数         | 说明     |
+|------------|--------|
+| enable     | 是否开启降级 | 
+| percentage | 请求丢弃比例 | 
+例子：
+
+客户端所有请求使用以下限流配置 (true, 50)
+> configDataId: `ClientName.ServiecName.degradation`
+
+```json
+{
+  "enable": true,
+  "percentage": 50
+}
+```
+
 ### 更多信息
 
 更多示例请参考 [example](https://github.com/kitex-contrib/config-nacos/tree/main/example)
