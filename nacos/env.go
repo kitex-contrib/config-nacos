@@ -53,5 +53,5 @@ func NacosAddr() string {
 
 // NacosNameSpaceId Get Nacos namespace id from environment variables
 func NacosNameSpaceId() string {
-	return os.Getenv(NacosDefaultConfigGroup)
+	return os.Getenv(NacosAliNamespaceEnv)
 }
