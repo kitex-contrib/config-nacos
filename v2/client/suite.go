@@ -15,45 +15,16 @@
 package client
 
 import (
-	"github.com/cloudwego/kitex/client"
 	"github.com/kitex-contrib/config-nacos/v2/nacos"
 	"github.com/kitex-contrib/config-nacos/v2/utils"
-)
 
-const (
-	retryConfigName          = "retry"
-	rpcTimeoutConfigName     = "rpc_timeout"
-	circuitBreakerConfigName = "circuit_break"
-	degradationName          = "degradation"
+	configclient "github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2/client"
 )
 
 // NacosClientSuite nacos client config suite, configure retry timeout limit and circuitbreak dynamically from nacos.
-type NacosClientSuite struct {
-	nacosClient nacos.Client
-	service     string
-	client      string
-	opts        utils.Options
-}
+type NacosClientSuite = configclient.NacosClientSuite
 
 // NewSuite service is the destination service name and client is the local identity.
 func NewSuite(service, client string, cli nacos.Client, opts ...utils.Option) *NacosClientSuite {
-	su := &NacosClientSuite{
-		service:     service,
-		client:      client,
-		nacosClient: cli,
-	}
-	for _, f := range opts {
-		f.Apply(&su.opts)
-	}
-	return su
-}
-
-// Options return a list client.Option
-func (s *NacosClientSuite) Options() []client.Option {
-	opts := make([]client.Option, 0, 7)
-	opts = append(opts, WithRetryPolicy(s.service, s.client, s.nacosClient, s.opts)...)
-	opts = append(opts, WithRPCTimeout(s.service, s.client, s.nacosClient, s.opts)...)
-	opts = append(opts, WithCircuitBreaker(s.service, s.client, s.nacosClient, s.opts)...)
-	opts = append(opts, WithDegradation(s.service, s.client, s.nacosClient, s.opts)...)
-	return opts
+	return configclient.NewSuite(service, client, cli, opts...)
 }

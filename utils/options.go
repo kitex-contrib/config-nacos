@@ -14,14 +14,10 @@
 
 package utils
 
-import "github.com/kitex-contrib/config-nacos/nacos"
+import "github.com/cloudwego-contrib/cwgo-pkg/config/nacos/utils"
 
 // Option is used to custom Options.
-type Option interface {
-	Apply(*Options)
-}
+type Option = utils.Option
 
 // Options is used to initialize the nacos config suit or option.
-type Options struct {
-	NacosCustomFunctions []nacos.CustomFunction
-}
+type Options = utils.Options

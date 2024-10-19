@@ -15,43 +15,27 @@
 package nacos
 
 import (
-	"os"
-	"strconv"
-
-	"github.com/cloudwego/kitex/pkg/klog"
+	"github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2/nacos"
 )
 
 // keep consistent with the env with alicloud
 const (
-	NacosAliServerAddrEnv = "serverAddr"
-	NacosAliPortEnv       = "serverPort"
-	NacosAliNamespaceEnv  = "namespace"
+	NacosAliServerAddrEnv = nacos.NacosAliServerAddrEnv
+	NacosAliPortEnv       = nacos.NacosAliPortEnv
+	NacosAliNamespaceEnv  = nacos.NacosAliNamespaceEnv
 )
 
 // NacosPort Get Nacos port from environment variables
 func NacosPort() uint64 {
-	portText := os.Getenv(NacosAliPortEnv)
-	if len(portText) == 0 {
-		return NacosDefaultPort
-	}
-	port, err := strconv.ParseInt(portText, 10, 64)
-	if err != nil {
-		klog.Errorf("ParseInt failed,err:%s", err.Error())
-		return NacosDefaultPort
-	}
-	return uint64(port)
+	return nacos.NacosPort()
 }
 
 // NacosAddr Get Nacos addr from environment variables
 func NacosAddr() string {
-	addr := os.Getenv(NacosAliServerAddrEnv)
-	if len(addr) == 0 {
-		return NacosDefaultServerAddr
-	}
-	return addr
+	return nacos.NacosAddr()
 }
 
 // NacosNameSpaceId Get Nacos namespace id from environment variables
 func NacosNameSpaceId() string {
-	return os.Getenv(NacosDefaultConfigGroup)
+	return nacos.NacosNameSpaceId()
 }
