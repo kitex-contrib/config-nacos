@@ -14,7 +14,7 @@
 
 package utils
 
-import "github.com/cloudwego-contrib/cwgo-pkg/config/common"
+import "github.com/kitex-contrib/config-nacos/utils"
 
 // ThreadSafeSet wrapper of Set.
 type ThreadSafeSet = utils.ThreadSafeSet

@@ -4,9 +4,9 @@ go 1.21
 
 replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
 
-replace github.com/cloudwego-contrib/cwgo-pkg/config/nacos => ../cwgo-pkg/config/nacos
+replace github.com/cloudwego-contrib/cwgo-pkg/config/nacos => github.com/smx-Morgan/cwgo-pkg/config/nacos v0.0.0-20241016000926-d56ef7e0f578
 
-replace github.com/cloudwego-contrib/cwgo-pkg/config/common => ../cwgo-pkg/config/common
+replace github.com/cloudwego-contrib/cwgo-pkg/config/common => github.com/smx-Morgan/cwgo-pkg/config/common v0.0.0-20241016000926-d56ef7e0f578
 
 require (
 	github.com/cloudwego-contrib/cwgo-pkg/config/nacos v0.0.0-00010101000000-000000000000

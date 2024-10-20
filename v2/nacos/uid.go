@@ -16,7 +16,6 @@ package nacos
 
 import "github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2/nacos"
 
-
 // GetUniqueID get the unique id
 func GetUniqueID() int64 {
 	return nacos.GetUniqueID()
