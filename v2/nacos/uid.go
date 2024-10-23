@@ -14,15 +14,9 @@
 
 package nacos
 
-import "go.uber.org/atomic"
-
-var uniqueID atomic.Int64
-
-func init() {
-	uniqueID.Store(0)
-}
+import "github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2/nacos"
 
 // GetUniqueID get the unique id
 func GetUniqueID() int64 {
-	return uniqueID.Add(1)
+	return nacos.GetUniqueID()
 }

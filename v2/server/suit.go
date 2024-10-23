@@ -15,37 +15,16 @@
 package server
 
 import (
-	"github.com/cloudwego/kitex/server"
 	"github.com/kitex-contrib/config-nacos/v2/nacos"
 	"github.com/kitex-contrib/config-nacos/v2/utils"
-)
 
-const (
-	limiterConfigName = "limit"
+	configserver "github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2/server"
 )
 
 // NacosServerSuite nacos server config suite, configure limiter config dynamically from nacos.
-type NacosServerSuite struct {
-	nacosClient nacos.Client
-	service     string
-	opts        utils.Options
-}
+type NacosServerSuite = configserver.NacosServerSuite
 
 // NewSuite service is the destination service.
 func NewSuite(service string, cli nacos.Client, opts ...utils.Option) *NacosServerSuite {
-	su := &NacosServerSuite{
-		service:     service,
-		nacosClient: cli,
-	}
-	for _, opt := range opts {
-		opt.Apply(&su.opts)
-	}
-	return su
-}
-
-// Options return a list client.Option
-func (s *NacosServerSuite) Options() []server.Option {
-	opts := make([]server.Option, 0, 2)
-	opts = append(opts, WithLimiter(s.service, s.nacosClient, s.opts))
-	return opts
+	return configserver.NewSuite(service, cli, opts...)
 }

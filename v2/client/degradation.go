@@ -16,63 +16,14 @@ package client
 
 import (
 	"github.com/cloudwego/kitex/client"
-	"github.com/cloudwego/kitex/pkg/klog"
-	"github.com/kitex-contrib/config-nacos/v2/pkg/degradation"
-	"github.com/nacos-group/nacos-sdk-go/v2/vo"
 
 	"github.com/kitex-contrib/config-nacos/v2/nacos"
 	"github.com/kitex-contrib/config-nacos/v2/utils"
+
+	configclient "github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2/client"
 )
 
 // WithDegradation sets the degradation policy from nacos configuration center.
 func WithDegradation(dest, src string, nacosClient nacos.Client, opts utils.Options) []client.Option {
-	param, err := nacosClient.ClientConfigParam(&nacos.ConfigParamConfig{
-		Category:          degradationName,
-		ServerServiceName: dest,
-		ClientServiceName: src,
-	})
-	if err != nil {
-		panic(err)
-	}
-
-	for _, f := range opts.NacosCustomFunctions {
-		f(&param)
-	}
-
-	uniqueID := nacos.GetUniqueID()
-
-	degradationContainer := initDegradation(param, dest, src, nacosClient, uniqueID)
-
-	return []client.Option{
-		client.WithACLRules(degradationContainer.GetACLRule()),
-		client.WithCloseCallbacks(func() error {
-			err := nacosClient.DeregisterConfig(param, uniqueID)
-			if err != nil {
-				return err
-			}
-			// cancel the configuration listener when client is closed.
-			return nil
-		}),
-	}
-}
-
-func initDegradation(param vo.ConfigParam, dest, src string,
-	nacosClient nacos.Client, uniqueID int64,
-) *degradation.Container {
-	degradationContainer := degradation.NewDegradationContainer()
-
-	onChangeCallback := func(data string, parser nacos.ConfigParser) {
-		config := &degradation.Config{}
-		err := parser.Decode(param.Type, data, config)
-		if err != nil {
-			klog.Warnf("[nacos] %s client nacos rpc degradation: unmarshal data %s failed: %s, skip...", dest, data, err)
-			return
-		}
-		// update degradation config
-		degradationContainer.NotifyPolicyChange(config)
-	}
-
-	nacosClient.RegisterConfigCallback(param, onChangeCallback, uniqueID)
-
-	return degradationContainer
+	return configclient.WithDegradation(dest, src, nacosClient, opts)
 }

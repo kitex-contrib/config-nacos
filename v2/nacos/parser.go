@@ -15,57 +15,24 @@
 package nacos
 
 import (
-	"fmt"
-
-	"github.com/nacos-group/nacos-sdk-go/v2/vo"
-	"sigs.k8s.io/yaml"
+	"github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2/nacos"
 )
 
 const (
-	NacosDefaultServerAddr   = "127.0.0.1"
-	NacosDefaultPort         = 8848
-	NacosDefaultGrpcPorc     = 9848
-	NacosDefaultConfigGroup  = "DEFAULT_GROUP"
-	NacosDefaultClientDataID = "{{.ClientServiceName}}.{{.ServerServiceName}}.{{.Category}}"
-	NacosDefaultServerDataID = "{{.ServerServiceName}}.{{.Category}}"
-)
-
-const (
-	defaultContent = ""
+	NacosDefaultServerAddr   = nacos.NacosDefaultServerAddr
+	NacosDefaultPort         = nacos.NacosDefaultPort
+	NacosDefaultGrpcPorc     = nacos.NacosDefaultGrpcPorc
+	NacosDefaultConfigGroup  = nacos.NacosDefaultConfigGroup
+	NacosDefaultClientDataID = nacos.NacosDefaultClientDataID
+	NacosDefaultServerDataID = nacos.NacosDefaultServerDataID
 )
 
 // CustomFunction use for customize the config parameters.
-type CustomFunction func(*vo.ConfigParam)
+type CustomFunction = nacos.CustomFunction
 
 // ConfigParamConfig use for render the dataId or group info by go template, ref: https://pkg.go.dev/text/template
 // The fixed key shows as below.
-type ConfigParamConfig struct {
-	Category          string
-	ClientServiceName string
-	ServerServiceName string
-}
-
-var _ ConfigParser = &parser{}
+type ConfigParamConfig = nacos.ConfigParamConfig
 
 // ConfigParser the parser for nacos config.
-type ConfigParser interface {
-	Decode(kind, data string, config interface{}) error
-}
-
-type parser struct{}
-
-// Decode decodes the data to struct in specified format.
-func (p *parser) Decode(kind, data string, config interface{}) error {
-	switch kind {
-	case "yaml", "json":
-		// since YAML is a superset of JSON, it can parse JSON using a YAML parser
-		return yaml.Unmarshal([]byte(data), config)
-	default:
-		return fmt.Errorf("unsupported config data type %s", kind)
-	}
-}
-
-// DefaultConfigParse default nacos config parser.
-func defaultConfigParse() ConfigParser {
-	return &parser{}
-}
+type ConfigParser = nacos.ConfigParser
