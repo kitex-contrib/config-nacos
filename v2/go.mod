@@ -4,7 +4,7 @@ go 1.21
 
 replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
 
-replace github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2 => github.com/smx-Morgan/cwgo-pkg/config/nacos/v2 v0.0.0-20241022123807-97b427526bb6
+replace github.com/cloudwego-contrib/cwgo-pkg/config/nacos/v2 => github.com/smx-Morgan/cwgo-pkg/config/nacos/v2 v2.0.0-20241022123807-97b427526bb6
 
 replace github.com/cloudwego-contrib/cwgo-pkg/config/common => github.com/smx-Morgan/cwgo-pkg/config/common v0.0.0-20241022123807-97b427526bb6
 
@@ -22,7 +22,7 @@ require (
 	github.com/alibabacloud-go/debug v1.0.0 // indirect
 	github.com/alibabacloud-go/tea v1.1.17 // indirect
 	github.com/alibabacloud-go/tea-utils v1.4.4 // indirect
-	github.com/aliyun/alibaba-cloud-sdk-go v1.63.32 // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v1.63.34 // indirect
 	github.com/aliyun/alibabacloud-dkms-gcs-go-sdk v0.2.2 // indirect
 	github.com/aliyun/alibabacloud-dkms-transfer-go-sdk v0.1.7 // indirect
 	github.com/apache/thrift v0.20.0 // indirect
