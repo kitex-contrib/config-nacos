@@ -273,7 +273,7 @@ echo 方法使用下面的配置（0.3、100），其他方法使用全局默认
 例子：
 
 客户端所有请求使用以下限流配置 (true, 50)
-> configDataId: `ClientName.ServiecName.degradation`
+> configDataId: `ClientName.ServiceName.degradation`
 
 ```json
 {
