@@ -7,7 +7,7 @@ require (
 	github.com/cloudwego/kitex v0.11.3
 	github.com/cloudwego/kitex-examples v0.3.3
 	github.com/cloudwego/thriftgo v0.3.17
-	github.com/nacos-group/nacos-sdk-go/v2 v2.2.7
+	github.com/nacos-group/nacos-sdk-go/v2 v2.2.5
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/atomic v1.11.0
